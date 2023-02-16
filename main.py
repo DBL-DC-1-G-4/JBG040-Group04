@@ -1,8 +1,8 @@
 # Custom imports
-from dc1.batch_sampler import BatchSampler
-from dc1.image_dataset import ImageDataset
-from dc1.net import Net
-from dc1.train_test import train_model, test_model
+from batch_sampler import BatchSampler
+from image_dataset import ImageDataset
+from net import Net
+from train_test import train_model, test_model
 
 # Torch imports
 import torch
@@ -24,8 +24,8 @@ from typing import List
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # Load the train and test data set
-    train_dataset = ImageDataset(Path("data/X_train.npy"), Path("data/Y_train.npy"))
-    test_dataset = ImageDataset(Path("data/X_test.npy"), Path("data/Y_test.npy"))
+    train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
+    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
 
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
