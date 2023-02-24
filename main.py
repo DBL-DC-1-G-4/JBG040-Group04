@@ -91,6 +91,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Testing:
             
             losses = test_model(model, test_sampler, loss_function, device)
+            ### My addition of checking the predictions
             # Set the model in evaluation mode
             model.eval()
 
@@ -100,7 +101,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Create lists to store the predicted labels and ground truth labels
             pred_labels = []
             true_labels = []
-
+            cm=[]
             # Iterate over the test data and make predictions
             with torch.no_grad():
                 for images, labels in test_loader:
@@ -112,15 +113,11 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     outputs = model(images)
                     _, predicted = torch.max(outputs, 1)
 
-                    # Append the predicted and ground truth labels to their respective lists
-                    pred_labels.append(predicted.item())
-                    true_labels.append(labels.item())
-
-            # Print the predicted and ground truth labels
-            print("Predicted labels: ", pred_labels)
-            print("Ground truth labels: ", true_labels)
-
-            
+                    pred_labels.extend(predicted.cpu().numpy())
+                    true_labels.extend(labels.cpu().numpy())
+            #sklearn function for a confusion matrix
+            cm = confusion_matrix(true_labels, pred_labels)
+            print(cm)
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
