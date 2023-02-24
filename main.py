@@ -19,6 +19,7 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
+from sklearn.metrics import confusion_matrix
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
@@ -70,7 +71,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     test_sampler = BatchSampler(
         batch_size=100, dataset=test_dataset, balanced=args.balanced_batches
     )
-
+   
     mean_losses_train: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
     
@@ -78,6 +79,9 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         if activeloop:
 
             # Training:
+            #my addition 
+            model.train()
+            #end
             losses = train_model(model, train_sampler, optimizer, loss_function, device)
             # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
@@ -85,8 +89,38 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             print(f"\nEpoch {e + 1} training done, loss on train set: {mean_loss}\n")
 
             # Testing:
+            
             losses = test_model(model, test_sampler, loss_function, device)
+            # Set the model in evaluation mode
+            model.eval()
 
+            # Create a dataloader for the test data
+            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+
+            # Create lists to store the predicted labels and ground truth labels
+            pred_labels = []
+            true_labels = []
+
+            # Iterate over the test data and make predictions
+            with torch.no_grad():
+                for images, labels in test_loader:
+                    # Move the images and labels to the device (GPU/CPU) used for training
+                    images = images.to(device)
+                    labels = labels.to(device)
+
+                    # Make predictions on the test images
+                    outputs = model(images)
+                    _, predicted = torch.max(outputs, 1)
+
+                    # Append the predicted and ground truth labels to their respective lists
+                    pred_labels.append(predicted.item())
+                    true_labels.append(labels.item())
+
+            # Print the predicted and ground truth labels
+            print("Predicted labels: ", pred_labels)
+            print("Ground truth labels: ", true_labels)
+
+            
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
@@ -143,3 +177,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+
