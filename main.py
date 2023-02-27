@@ -19,7 +19,9 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
-from sklearn.metrics import confusion_matrix
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc
+import seaborn as sns
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
@@ -116,8 +118,19 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
             #sklearn function for a confusion matrix
+            print("recallscore")
+            print(recall_score(true_labels, pred_labels, average="macro"))
+            print("precision_score")
+            print(precision_score(true_labels, pred_labels, average="macro"))
+            
             cm = confusion_matrix(true_labels, pred_labels)
             print(cm)
+
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1,2,3,4,5])
+            disp.plot()
+            plt.title("Confusion matrix")
+            plt.show()
+
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
