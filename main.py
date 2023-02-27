@@ -116,8 +116,6 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     # Make predictions on the test images
                     outputs = model(images)
                     _, predicted = torch.max(outputs, 1)
-                    
-                    #probs = torch.softmax(outputs, dim=1)
 
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
@@ -154,12 +152,12 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     # Make predictions on the test images
                     outputs = model(images)
                     probs = torch.softmax(outputs, dim=1)
-                    
 
                     # Store the predicted probabilities for the current test image
                     pred_probs[i] = probs.cpu().numpy()
-                    print(probs)
 
+                    # Store the true label for the current test image
+                    true_labels.append(labels.cpu().numpy())
 
             # Convert the true labels list to a numpy array
             true_labels = np.array(true_labels)
