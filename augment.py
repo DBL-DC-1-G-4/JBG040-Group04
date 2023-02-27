@@ -75,8 +75,8 @@ transform = torch.nn.Sequential(
         #transforms.ToTensor(),
 
         transforms.Normalize(
-            mean=[0.5, 0.5, 0.5],
-            std=[0.5, 0.5, 0.5]
+            mean=[0.5],
+            std=[0.5]
             ),
 
         #transforms.resize()  # Dimensions 1x128x128
