@@ -19,15 +19,15 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score
 import seaborn as sns
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # Load the train and test data set
-    train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
-    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
+    train_dataset = ImageDataset(Path("../data/X_trainshort.npy"), Path("../data/Y_trainshort.npy"))
+    test_dataset = ImageDataset(Path("../data/X_testshort.npy"), Path("../data/Y_testshort.npy"))
 
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
@@ -104,6 +104,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             true_labels = []
             cm=[]
             labels_dict = { 3 :  'No finding', 2 :  "Infiltration", 0 :  "Atelectasis", 1 :  "Effusion", 5 :  'Pneumothorax', 4 :  "Nodule"}
+            labels_diseases = ["Atelectasis", "Effusion","Infiltration", 'No finding' , "Nodule", 'Pneumothorax']
             # Iterate over the test data and make predictions
             with torch.no_grad():
                 for images, labels in test_loader:
@@ -118,21 +119,17 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
             #sklearn function for a confusion matrix
+            print("recallscore")
+            print(recall_score(true_labels, pred_labels, average="macro"))
+            print("precision_score")
+            print(precision_score(true_labels, pred_labels, average="macro"))
             cm = confusion_matrix(true_labels, pred_labels)
-            print(cm)
             disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1,2,3,4,5])
             disp.plot()
+            plt.title("Confusion matrix")
+            plt.xlabel(labels_diseases)
+            plt.ylabel(labels_diseases)
             plt.show()
-            #seaborn version of heatmap with labels of diseases
-            ax= plt.subplot()
-            sns.heatmap(cm,annot=True, ax=ax)
-            # labels, title and ticks
-            ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels'); 
-            ax.set_title('Confusion Matrix'); 
-            ax.xaxis.set_ticklabels(["Atelectasis", "Effusion", "Infiltration",'No finding', "Nodule", 'Pneumothorax'])
-            ax.yaxis.set_ticklabels(['Pneumothorax', "Nodule", 'No finding', "Infiltration", "Effusion", "Atelectasis"])
-            plt.show()
-            ax.plot()
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
