@@ -20,7 +20,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 import numpy as np
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay
+from itertools import cycle
+from sklearn.preprocessing import label_binarize
 import seaborn as sns
 
 
@@ -114,6 +116,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     # Make predictions on the test images
                     outputs = model(images)
                     _, predicted = torch.max(outputs, 1)
+                    
+                    #probs = torch.softmax(outputs, dim=1)
 
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
@@ -130,6 +134,43 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             disp.plot()
             plt.title("Confusion matrix")
             plt.show()
+    	    #AUC ROC
+            # Create a dataloader for the test data
+            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+            n_classes=6
+            # Create an empty numpy array to store the predicted probabilities for each test image
+            pred_probs = np.zeros((len(test_dataset), n_classes))
+
+            # Create lists to store the true labels
+            true_labels = []
+
+            # Iterate over the test data and make predictions
+            with torch.no_grad():
+                for i, (images, labels) in enumerate(test_loader):
+                    # Move the images and labels to the device (GPU/CPU) used for training
+                    images = images.to(device)
+                    labels = labels.to(device)
+
+                    # Make predictions on the test images
+                    outputs = model(images)
+                    probs = torch.softmax(outputs, dim=1)
+                    
+
+                    # Store the predicted probabilities for the current test image
+                    pred_probs[i] = probs.cpu().numpy()
+                    print(probs)
+
+
+            # Convert the true labels list to a numpy array
+            true_labels = np.array(true_labels)
+
+            # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
+            pred_probs = pred_probs.reshape((-1, n_classes))
+
+            # Calculate the AUC-ROC score
+            auc_roc_score = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
+
+            print("AUC-ROC score:", auc_roc_score)
 
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
