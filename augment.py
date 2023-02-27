@@ -3,6 +3,7 @@ from torchvision import transforms
 #from image_dataset import ImageDataset
 from pathlib import Path
 import numpy as np
+from matplotlib import pyplot as plt
 
 def convert_npy_to_torch(npy_file_path):
     """
@@ -43,12 +44,14 @@ transform = torch.nn.Sequential(
 
         transforms.RandomHorizontalFlip(),
 
-        transforms.ColorJitter(
-            brightness=0.2,
-            contrast=0.2,
-            saturation=0.2,
-            hue=0.2
-            ),
+# =============================================================================
+#         transforms.ColorJitter(
+#             brightness=0.2,
+#             contrast=0.2,
+#             saturation=0.2,
+#             hue=0.2
+#             ),
+# =============================================================================
 
         transforms.RandomAffine(
             degrees=0,
@@ -67,26 +70,29 @@ transform = torch.nn.Sequential(
             p=0.2
             ),
 
-        #transforms.RandomApply(
-         #   [transforms.Grayscale(num_output_channels=1)],
-          #  p=0.1
-           # ),
+        transforms.RandomApply(
+            [transforms.Grayscale(num_output_channels=1)],
+            p=0.1
+            ),
 
         #transforms.ToTensor(),
 
         transforms.Normalize(
-            mean=[0.5],
-            std=[0.5]
+            mean=0.5,
+            std=0.5
             ),
 
         #transforms.resize()  # Dimensions 1x128x128
 )
 
+npy_file = np.load(xtrain_path)
 
 c = X_train_torch[0].to(dtype = torch.float64)
-
 d = transform(c)
+numpy_array = d.numpy()
 
+before = plt.imshow(npy_file[0].squeeze(), cmap='gray')
+after = plt.imshow(numpy_array.squeeze(), cmap='gray')
 
 # =============================================================================
 # class NumpyDataset(torch.utils.data.Dataset):
