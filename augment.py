@@ -67,10 +67,10 @@ transform = torch.nn.Sequential(
             p=0.2
             ),
 
-        transforms.RandomApply(
-            [transforms.Grayscale(num_output_channels=3)],
-            p=0.1
-            ),
+        #transforms.RandomApply(
+         #   [transforms.Grayscale(num_output_channels=1)],
+          #  p=0.1
+           # ),
 
         #transforms.ToTensor(),
 
@@ -79,8 +79,14 @@ transform = torch.nn.Sequential(
             std=[0.5, 0.5, 0.5]
             ),
 
-        transforms.resize()  # Dimensions 1x128x128
+        #transforms.resize()  # Dimensions 1x128x128
 )
+
+
+c = X_train_torch[0].to(dtype = torch.float64)
+
+d = transform(c)
+
 
 # =============================================================================
 # class NumpyDataset(torch.utils.data.Dataset):
