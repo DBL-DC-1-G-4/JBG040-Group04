@@ -72,7 +72,7 @@ transform = torch.nn.Sequential(
             ),
 
         transforms.RandomApply(
-            [transforms.Grayscale(num_output_channels=1)],
+            [tranminutessforms.Grayscale(num_output_channels=1)],
             p=0.1
             ),
 
