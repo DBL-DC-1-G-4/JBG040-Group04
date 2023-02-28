@@ -4,6 +4,7 @@ from torchvision import transforms
 from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 def convert_npy_to_torch(npy_file_path):
     """
@@ -25,7 +26,7 @@ def convert_npy_to_torch(npy_file_path):
 #xtrain_path = Path("../data/X_train.npy")
 ytrain_path = Path("../data/Y_train.npy")
 
-xtrain_path = r"/Users/zygimantaskrasauskas/Desktop/DS1/data/X_train.npy"
+xtrain_path = r"/home/maxwell/Documents/Y2/DC1/data/X_train.npy"
 
 X_train_torch = convert_npy_to_torch(xtrain_path)
 
@@ -75,31 +76,41 @@ transform = torch.nn.Sequential(
             p=0.1
             ),
 
-        #transforms.ToTensor(),
 
         transforms.Normalize(
             mean=0.5,
             std=0.5
             ),
 
-        #transforms.resize()  # Dimensions 1x128x128
 )
+
+# scripted_transformed = torch.jit.script(transform)
 
 npy_file = np.load(xtrain_path)
 
-c = X_train_torch[0].to(dtype = torch.float64)
-d = transform(c)
-numpy_array = d.numpy()
 
-before = plt.imshow(npy_file[0].squeeze(), cmap='gray')
-after = plt.imshow(numpy_array.squeeze(), cmap='gray')
+#%%
+floatTorch = X_train_torch.to(dtype=torch.float64)
+outTens = torch.tensor(data=[], dtype=torch.float64)
+# i = 0
+for tens in tqdm(X_train_torch.to(dtype=torch.float64)):
+    outTens = torch.cat((outTens, transform(tens), 0))
+    # i += 1
+
+np.save(
+    "/home/maxwell/Documents/Y2/DC1/data/aug_X_train.npy",
+    outTens.numpy()
+)
+
+# before = plt.imshow(npy_file[0].squeeze(), cmap='gray')
+# after = plt.imshow(numpy_array[0].squeeze(), cmap='gray')
 
 # =============================================================================
 # class NumpyDataset(torch.utils.data.Dataset):
 #     def __init__(self, dPath, transform=None):
 #         self.data = np.load(dPath)
 #         self.transform = transform
-# 
+
 #     def __len__(self):
 #         return len(self.data)
 # 
@@ -108,8 +119,5 @@ after = plt.imshow(numpy_array.squeeze(), cmap='gray')
 #         if self.transform:
 #             self.transform(x)
 #         return x
-# 
-# 
-# scripted_transformed = torch.jit.script(transform)
 # 
 # =============================================================================
