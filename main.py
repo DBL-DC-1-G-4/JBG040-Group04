@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 import numpy as np
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay,precision_recall_fscore_support
 from itertools import cycle
 from sklearn.preprocessing import label_binarize
 import seaborn as sns
@@ -96,7 +96,11 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             
             losses = test_model(model, test_sampler, loss_function, device)
             ### My addition of checking the predictions
-            # Set the model in evaluation mode
+
+            n_classes=6
+            # Create an empty numpy array to store the predicted probabilities for each test image
+            pred_probs = np.zeros((len(test_dataset), n_classes))
+
             model.eval()
 
             # Create a dataloader for the test data
@@ -105,42 +109,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Create lists to store the predicted labels and ground truth labels
             pred_labels = []
             true_labels = []
-            cm=[]
-            # Iterate over the test data and make predictions
-            with torch.no_grad():
-                for images, labels in test_loader:
-                    # Move the images and labels to the device (GPU/CPU) used for training
-                    images = images.to(device)
-                    labels = labels.to(device)
+            cm = []
 
-                    # Make predictions on the test images
-                    outputs = model(images)
-                    _, predicted = torch.max(outputs, 1)
-
-                    pred_labels.extend(predicted.cpu().numpy())
-                    true_labels.extend(labels.cpu().numpy())
-            #sklearn function for a confusion matrix
-            print("recallscore")
-            print(recall_score(true_labels, pred_labels, average="macro"))
-            print("precision_score")
-            print(precision_score(true_labels, pred_labels, average="macro"))
-            
-            cm = confusion_matrix(true_labels, pred_labels)
-            print(cm)
-
-            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1,2,3,4,5])
-            disp.plot()
-            plt.title("Confusion matrix")
-            plt.show()
-    	    #AUC ROC
-            # Create a dataloader for the test data
-            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
-            n_classes=6
             # Create an empty numpy array to store the predicted probabilities for each test image
-            pred_probs = np.zeros((len(test_dataset), n_classes))
-
-            # Create lists to store the true labels
-            true_labels = []
+            pred_probs = np.zeros((len(test_dataset), 6))
 
             # Iterate over the test data and make predictions
             with torch.no_grad():
@@ -151,24 +123,44 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
                     # Make predictions on the test images
                     outputs = model(images)
+                    _, predicted = torch.max(outputs, 1)
                     probs = torch.softmax(outputs, dim=1)
+
+                    # Store the predicted labels and true labels for the current test image
+                    pred_labels.extend(predicted.cpu().numpy())
+                    true_labels.extend(labels.cpu().numpy())
 
                     # Store the predicted probabilities for the current test image
                     pred_probs[i] = probs.cpu().numpy()
 
-                    # Store the true label for the current test image
-                    true_labels.append(labels.cpu().numpy())
+            #sklearn function for a confusion matrix
+            print("Recall score:", recall_score(true_labels, pred_labels, average="macro"))
+            print("Precision score:", precision_score(true_labels, pred_labels, average="macro"))
 
-            # Convert the true labels list to a numpy array
-            true_labels = np.array(true_labels)
+            cm = confusion_matrix(true_labels, pred_labels)
+            print(cm)
+
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
+            disp.plot()
+            plt.title("Confusion matrix")
+            plt.show()
 
             # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
-            pred_probs = pred_probs.reshape((-1, n_classes))
+            pred_probs = pred_probs.reshape((-1, 6))
 
-            # Calculate the AUC-ROC score
-            auc_roc_score = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
+            # Calculate the AUC-ROC score OVR
+            auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
+            print("AUC-ROC-OVR score:", auc_roc_score_ovr)
+            # Calculate the AUC-ROC score OVO
+            auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
+            print("AUC-ROC-OVO score:", auc_roc_score_ovo)
 
-            print("AUC-ROC score:", auc_roc_score)
+            # Calculate the precision, recall, and f1-score for each class
+            precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
+
+            # Print the precision, recall, and f1-score for each class
+            for i in range(len(precision)):
+                print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
 
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
