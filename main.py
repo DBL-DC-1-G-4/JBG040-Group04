@@ -162,6 +162,58 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             for i in range(len(precision)):
                 print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
 
+            
+            from sklearn.preprocessing import label_binarize
+            from sklearn.multiclass import OneVsRestClassifier
+            from sklearn.ensemble import RandomForestClassifier
+
+            # Binarize the true labels
+            y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
+            n_classes = y_true.shape[1]
+
+            # Fit the OneVsRestClassifier on the predicted probabilities
+            classifier = OneVsRestClassifier(RandomForestClassifier())
+            classifier.fit(pred_probs, y_true)
+
+            # Compute the ROC curve and ROC area for each class
+            fpr = dict()
+            tpr = dict()
+            roc_auc = dict()
+            for i in range(n_classes):
+                fpr[i], tpr[i], _ = roc_curve(y_true[:, i], pred_probs[:, i])
+                roc_auc[i] = auc(fpr[i], tpr[i])
+
+            # Compute micro-average ROC curve and ROC area
+            fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
+            roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+            # Plot the ROC curve for each class
+            plt.figure()
+            lw = 2
+            colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
+            for i, color in zip(range(n_classes), colors):
+                plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+                        label='ROC curve of class {0} (area = {1:0.2f})'
+                        ''.format(i, roc_auc[i]))
+
+            # Plot the micro-average ROC curve
+            plt.plot(fpr["micro"], tpr["micro"],
+                    label='micro-average ROC curve (area = {0:0.2f})'
+                    ''.format(roc_auc["micro"]),
+                    color='deeppink', linestyle=':', linewidth=4)
+
+            plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Multi-class ROC Curve')
+            plt.legend(loc="lower right")
+            plt.show()
+
+
+
+
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
