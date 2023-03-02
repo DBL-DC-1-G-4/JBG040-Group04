@@ -13,6 +13,7 @@ from torchsummary import summary  # type: ignore
 # Other imports
 import matplotlib.pyplot as plt  # type: ignore
 from matplotlib.pyplot import figure
+
 import os
 import argparse
 import plotext  # type: ignore
@@ -21,8 +22,9 @@ from pathlib import Path
 from typing import List
 import numpy as np
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay,precision_recall_fscore_support
-from itertools import cycle
 from sklearn.preprocessing import label_binarize
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 
 
@@ -162,14 +164,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             for i in range(len(precision)):
                 print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
 
-            
-            from sklearn.preprocessing import label_binarize
-            from sklearn.multiclass import OneVsRestClassifier
-            from sklearn.ensemble import RandomForestClassifier
 
             # Binarize the true labels
             y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
-            n_classes = y_true.shape[1]
+
 
             # Fit the OneVsRestClassifier on the predicted probabilities
             classifier = OneVsRestClassifier(RandomForestClassifier())
@@ -192,16 +190,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             lw = 2
             colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
             for i, color in zip(range(n_classes), colors):
-                plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                        label='ROC curve of class {0} (area = {1:0.2f})'
-                        ''.format(i, roc_auc[i]))
+                plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
 
             # Plot the micro-average ROC curve
-            plt.plot(fpr["micro"], tpr["micro"],
-                    label='micro-average ROC curve (area = {0:0.2f})'
-                    ''.format(roc_auc["micro"]),
-                    color='deeppink', linestyle=':', linewidth=4)
-
+            plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
             plt.plot([0, 1], [0, 1], 'k--', lw=lw)
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
