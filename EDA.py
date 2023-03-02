@@ -20,6 +20,9 @@ plt.savefig('bar_Y_training')
 plt.show()
 
 #image display
+label_dict = {0:"Atelectasis", 1: "Effusion", 2: "Infiltration" ,3: "No finding",4: "Nodule",5: "Pneumothorax"}
+mono_font = {'fontname':'monospace'} #used for changing the font in the random picture titles
+
 def showTenRandomImages(image_data : np.array, label_data : np.array = None) -> None:
     """Show ten (pseudo-)random images in the input array and optionally show the corresponding label
     Input: image_data is X, label_data is Y"""
@@ -33,7 +36,7 @@ def showTenRandomImages(image_data : np.array, label_data : np.array = None) -> 
         rand_im = random.randrange(0, len(image_data)) #generate what image to display
         label = label_data[rand_im]
         ax.imshow(image_data[rand_im][0], cmap='Greys') #add the image to the subplot
-        ax.set_title(f"Class label: {label}", fontsize=8)
+        ax.set_title(f"{label_dict[label]}", fontsize=8, **mono_font)
         ax.axis('off')
     plt.show()
 
