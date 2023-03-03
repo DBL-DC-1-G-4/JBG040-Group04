@@ -142,11 +142,6 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             cm = confusion_matrix(true_labels, pred_labels)
             print(cm)
 
-            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
-            disp.plot()
-            plt.title("Confusion matrix")
-            plt.show()
-
             # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
             pred_probs = pred_probs.reshape((-1, 6))
 
@@ -185,27 +180,6 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
             roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
-            # Plot the ROC curve for each class
-            plt.figure()
-            lw = 2
-            colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
-            for i, color in zip(range(n_classes), colors):
-                plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
-
-            # Plot the micro-average ROC curve
-            plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
-            plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title('Multi-class ROC Curve')
-            plt.legend(loc="lower right")
-            plt.show()
-
-
-
-
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
@@ -229,7 +203,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Saving the model
     torch.save(model.state_dict(), f"model_weights/model_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.txt")
-    
+
     # Create plot of losses
     figure(figsize=(9, 10), dpi=80)
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
@@ -237,13 +211,72 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     ax1.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
     ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
     fig.legend()
+    # save plot of losses
+    fig.savefig(Path("artifacts") / f"lossessession_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
     
     # Check if /artifacts/ subdir exists
     if not Path("artifacts/").exists():
         os.mkdir(Path("artifacts/"))
 
-    # save plot of losses
-    fig.savefig(Path("artifacts") / f"session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+    # list for barchart x axis
+    l = ["0","1","2","3","4","5"]
+    # save precision barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,precision)
+    plt.xlabel("classes")
+    plt.ylabel("precision")
+    plt.title("precision scores for each class")
+    fig.savefig(Path("artifacts") / f"precision_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save recall barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,recall)
+    plt.xlabel("classes")
+    plt.ylabel("recall")
+    plt.title("recall scores for each class")
+    fig.savefig(Path("artifacts") / f"recall_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save f1_score barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,f1_score)
+    plt.xlabel("classes")
+    plt.ylabel("f1_score")
+    plt.title("f1_score scores for each class")
+    fig.savefig(Path("artifacts") / f"f1_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save ROC curve
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
+    lw = 2
+    for i, color in zip(range(n_classes), colors):
+        plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
+    plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
+    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Multi-class ROC Curve')
+    plt.legend(loc="lower right")
+    fig.savefig(Path("artifacts") / f"ROC_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save confusion matrix
+    cm = confusion_matrix(true_labels, pred_labels)
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
+    disp.plot()
+    plt.title("Confusion matrix")
+    disp.figure_.savefig(Path("artifacts") / f"confmatr_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save superimposed plot of losses for epochs
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
+    plt.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
+    plt.legend()
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("superimposed loss")
+    fig.savefig(Path("artifacts") / f"loss_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
 
 
 if __name__ == "__main__":
