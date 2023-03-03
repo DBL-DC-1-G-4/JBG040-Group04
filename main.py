@@ -13,13 +13,18 @@ from torchsummary import summary  # type: ignore
 # Other imports
 import matplotlib.pyplot as plt  # type: ignore
 from matplotlib.pyplot import figure
+
 import os
 import argparse
 import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay,precision_recall_fscore_support
+from sklearn.preprocessing import label_binarize
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 
 
@@ -93,7 +98,11 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             
             losses = test_model(model, test_sampler, loss_function, device)
             ### My addition of checking the predictions
-            # Set the model in evaluation mode
+
+            n_classes=6
+            # Create an empty numpy array to store the predicted probabilities for each test image
+            pred_probs = np.zeros((len(test_dataset), n_classes))
+
             model.eval()
 
             # Create a dataloader for the test data
@@ -102,12 +111,14 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Create lists to store the predicted labels and ground truth labels
             pred_labels = []
             true_labels = []
-            cm=[]
-            labels_dict = { 3 :  'No finding', 2 :  "Infiltration", 0 :  "Atelectasis", 1 :  "Effusion", 5 :  'Pneumothorax', 4 :  "Nodule"}
-            labels_diseases = ["Atelectasis", "Effusion","Infiltration", 'No finding' , "Nodule", 'Pneumothorax']
+            cm = []
+
+            # Create an empty numpy array to store the predicted probabilities for each test image
+            pred_probs = np.zeros((len(test_dataset), 6))
+
             # Iterate over the test data and make predictions
             with torch.no_grad():
-                for images, labels in test_loader:
+                for i, (images, labels) in enumerate(test_loader):
                     # Move the images and labels to the device (GPU/CPU) used for training
                     images = images.to(device)
                     labels = labels.to(device)
@@ -115,20 +126,60 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     # Make predictions on the test images
                     outputs = model(images)
                     _, predicted = torch.max(outputs, 1)
+                    probs = torch.softmax(outputs, dim=1)
 
+                    # Store the predicted labels and true labels for the current test image
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
+
+                    # Store the predicted probabilities for the current test image
+                    pred_probs[i] = probs.cpu().numpy()
+
             #sklearn function for a confusion matrix
-            print("recallscore")
-            print(recall_score(true_labels, pred_labels, average="macro"))
-            print("recall_score")
+            print("Recall score:", recall_score(true_labels, pred_labels, average="macro"))
+            print("Precision score:", precision_score(true_labels, pred_labels, average="macro"))
+
             cm = confusion_matrix(true_labels, pred_labels)
-            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1,2,3,4,5])
-            disp.plot()
-            plt.title("Confusion matrix")
-            plt.xlabel(labels_diseases)
-            plt.ylabel(labels_diseases)
-            plt.show()
+            print(cm)
+
+            # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
+            pred_probs = pred_probs.reshape((-1, 6))
+
+            # Calculate the AUC-ROC score OVR
+            auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
+            print("AUC-ROC-OVR score:", auc_roc_score_ovr)
+            # Calculate the AUC-ROC score OVO
+            auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
+            print("AUC-ROC-OVO score:", auc_roc_score_ovo)
+
+            # Calculate the precision, recall, and f1-score for each class
+            precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
+
+            # Print the precision, recall, and f1-score for each class
+            for i in range(len(precision)):
+                print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
+
+
+            # Binarize the true labels
+            y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
+
+
+            # Fit the OneVsRestClassifier on the predicted probabilities
+            classifier = OneVsRestClassifier(RandomForestClassifier())
+            classifier.fit(pred_probs, y_true)
+
+            # Compute the ROC curve and ROC area for each class
+            fpr = dict()
+            tpr = dict()
+            roc_auc = dict()
+            for i in range(n_classes):
+                fpr[i], tpr[i], _ = roc_curve(y_true[:, i], pred_probs[:, i])
+                roc_auc[i] = auc(fpr[i], tpr[i])
+
+            # Compute micro-average ROC curve and ROC area
+            fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
+            roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_test.append(mean_loss)
@@ -152,7 +203,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Saving the model
     torch.save(model.state_dict(), f"model_weights/model_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.txt")
-    
+
     # Create plot of losses
     figure(figsize=(9, 10), dpi=80)
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
@@ -160,13 +211,72 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     ax1.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
     ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
     fig.legend()
+    # save plot of losses
+    fig.savefig(Path("artifacts") / f"lossessession_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
     
     # Check if /artifacts/ subdir exists
     if not Path("artifacts/").exists():
         os.mkdir(Path("artifacts/"))
 
-    # save plot of losses
-    fig.savefig(Path("artifacts") / f"session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+    # list for barchart x axis
+    l = ["0","1","2","3","4","5"]
+    # save precision barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,precision)
+    plt.xlabel("classes")
+    plt.ylabel("precision")
+    plt.title("precision scores for each class")
+    fig.savefig(Path("artifacts") / f"precision_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save recall barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,recall)
+    plt.xlabel("classes")
+    plt.ylabel("recall")
+    plt.title("recall scores for each class")
+    fig.savefig(Path("artifacts") / f"recall_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save f1_score barchart
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.bar(l,f1_score)
+    plt.xlabel("classes")
+    plt.ylabel("f1_score")
+    plt.title("f1_score scores for each class")
+    fig.savefig(Path("artifacts") / f"f1_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save ROC curve
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
+    lw = 2
+    for i, color in zip(range(n_classes), colors):
+        plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
+    plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
+    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Multi-class ROC Curve')
+    plt.legend(loc="lower right")
+    fig.savefig(Path("artifacts") / f"ROC_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save confusion matrix
+    cm = confusion_matrix(true_labels, pred_labels)
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
+    disp.plot()
+    plt.title("Confusion matrix")
+    disp.figure_.savefig(Path("artifacts") / f"confmatr_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # save superimposed plot of losses for epochs
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    plt.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
+    plt.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
+    plt.legend()
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("superimposed loss")
+    fig.savefig(Path("artifacts") / f"loss_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
 
 
 if __name__ == "__main__":
