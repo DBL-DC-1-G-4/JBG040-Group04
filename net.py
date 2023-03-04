@@ -8,6 +8,8 @@ class Net(nn.Module):
 
         self.cnn_layers = nn.Sequential(
             # Defining a 2D convolution layer
+            # Each layer is convolution, batch normalization
+            # ReLU, max pooling and dropout
             nn.Conv2d(1, 64, kernel_size=4, stride=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
