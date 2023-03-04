@@ -13,11 +13,16 @@ Y_train = np.load(r"C:\Users\20212392\OneDrive - TU Eindhoven\Uni\Y2\Q3\Data Cha
 unique_Y_train, counts_Y_train = np.unique(Y_train, return_counts=True) #count the occurences from each value in Y_train
 unique_Y_test, counts_Y_test = np.unique(Y_test, return_counts=True)
 
-bar_Y_train = plt.bar([1,2,3,4,5,6], counts_Y_train) #display the occurences in a bar chart
-bar_Y_test = plt.bar([1,2,3,4,5,6], counts_Y_test)
-plt.title('Division of the training class labels')
+bar_Y_train = plt.bar(["Atelectasis", "Effusion", "Infiltration" ,"No finding","Nodule","Pneumothorax"], counts_Y_train) #display the occurences in a bar chart
+
+plt.title('Division of the Training Class Labels')
 plt.savefig('bar_Y_training')
 plt.show()
+bar_Y_test = plt.bar(["Atelectasis", "Effusion", "Infiltration" ,"No finding","Nodule","Pneumothorax"], counts_Y_test)
+plt.title('Division of the Test Class Labels')
+plt.savefig('bar_Y_test')
+plt.show()
+
 
 #image display
 label_dict = {0:"Atelectasis", 1: "Effusion", 2: "Infiltration" ,3: "No finding",4: "Nodule",5: "Pneumothorax"}
@@ -36,7 +41,7 @@ def showTenRandomImages(image_data : np.array, label_data : np.array = None) -> 
         rand_im = random.randrange(0, len(image_data)) #generate what image to display
         label = label_data[rand_im]
         ax.imshow(image_data[rand_im][0], cmap='Greys') #add the image to the subplot
-        ax.set_title(f"{label_dict[label]}", fontsize=8, **mono_font)
+        ax.set_title(f"{label_dict[label]}", fontsize=7, **mono_font)
         ax.axis('off')
     plt.show()
 
