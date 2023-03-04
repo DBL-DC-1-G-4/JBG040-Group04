@@ -72,7 +72,7 @@ transform = torch.nn.Sequential(
             ),
 
         transforms.RandomApply(
-            [tranminutessforms.Grayscale(num_output_channels=1)],
+            [transforms.Grayscale(num_output_channels=1)],
             p=0.1
             ),
 
@@ -88,22 +88,26 @@ transform = torch.nn.Sequential(
 
 npy_file = np.load(xtrain_path)
 
+#%%
+
+floatTorch = X_train_torch.to(dtype=torch.float64)
+
+test = transform(floatTorch[0])
+#outTens = torch.tensor(data=[], dtype=torch.float64)
+# i = 0
+#for tens in tqdm(X_train_torch.to(dtype=torch.float64)):
+#    outTens = torch.cat((outTens, transform(tens), 0))
+#    i += 1
+
+#np.save(
+#    "/home/maxwell/Documents/Y2/DC1/data/aug_X_train.npy",
+#    outTens.numpy()
+#)
+
+before = plt.imshow(npy_file[0].squeeze(), cmap='gray')
 
 #%%
-floatTorch = X_train_torch.to(dtype=torch.float64)
-outTens = torch.tensor(data=[], dtype=torch.float64)
-# i = 0
-for tens in tqdm(X_train_torch.to(dtype=torch.float64)):
-    outTens = torch.cat((outTens, transform(tens), 0))
-    # i += 1
-
-np.save(
-    "/home/maxwell/Documents/Y2/DC1/data/aug_X_train.npy",
-    outTens.numpy()
-)
-
-# before = plt.imshow(npy_file[0].squeeze(), cmap='gray')
-# after = plt.imshow(numpy_array[0].squeeze(), cmap='gray')
+after = plt.imshow(test.squeeze(), cmap='gray')
 
 # =============================================================================
 # class NumpyDataset(torch.utils.data.Dataset):
