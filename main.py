@@ -20,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # Load the train and test data set
@@ -29,7 +28,12 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
-
+    
+    m = torch.jit.script(Net(n_classes=6))
+    torch.jit.save(m, 'initial.pt')
+    
+    # This line is equivalent to the previous
+    
     # Initialize optimizer(s) and loss function(s)
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()

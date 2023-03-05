@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
 
-
 class Net(nn.Module):
     def __init__(self, n_classes: int) -> None:
         super(Net, self).__init__()
-
+        
         self.cnn_layers = nn.Sequential(
             # Defining a 2D convolution layer
             nn.Conv2d(1, 64, kernel_size=4, stride=1),
