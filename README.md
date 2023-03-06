@@ -3,7 +3,7 @@
 The code should be run using the 'main.py' file.
 
 augment.py contains the current image augmentation process
-
+EDA.py contains the exploratory data analysis
 
 # Data-Challenge-1-template-code
 This repository contains the template code for the TU/e course JBG040 Data Challenge 1.
