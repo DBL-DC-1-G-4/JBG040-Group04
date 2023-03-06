@@ -6,6 +6,8 @@ augment.py contains the current image augmentation process
 
 EDA.py contains the exploratory data analysis
 
+iwo_main.py contains evaluation metrics such as f1 score, precision, recall roc_curve and roc auc scores
+
 # Data-Challenge-1-template-code
 This repository contains the template code for the TU/e course JBG040 Data Challenge 1.
 Please read this document carefully as it has been filled out with important information.
