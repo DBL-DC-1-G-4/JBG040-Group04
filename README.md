@@ -3,6 +3,7 @@
 The code should be run using the 'main.py' file.
 
 augment.py contains the current image augmentation process
+
 EDA.py contains the exploratory data analysis
 
 # Data-Challenge-1-template-code
