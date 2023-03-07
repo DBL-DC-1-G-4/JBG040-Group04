@@ -1,17 +1,41 @@
 from torchvision import transforms
 import torch
-import numpy
-from monaugment import getDirs
-from augment import convert_npy_to_torch
-torch.manual_seed
+import numpy as np
+import os
+
+def getDirs():
+    parDir = os.path.dirname(os.getcwd())
+    data_path = os.path.join(parDir, "data")
+    x_train_path = os.path.join(data_path, "X_train.npy")
+    y_train_path = os.path.join(data_path, "Y_train.npy")
+    return parDir, x_train_path, y_train_path, x_test_path, y_test_path
+
+def convert_npy_to_torch(npy_file_path):
+    """
+    Converts numpy array into a pytorch object.
+
+    Input:
+    path: path for the numpy file.
+
+    Outputs:
+    tensor object: creates a pytorch object.
+    """
+
+    npy_file = np.load(npy_file_path)
+
+    torch_object = torch.from_numpy(npy_file)
+
+    return torch_object
+
+torch.manual_seed(689)
 parDir, x_train_path, y_train_path, x_test_path, y_test_path = getDirs()
 
-x_dst = convert_npy_to_torch(x_train_path)
+x_dst = convert_npy_to_torch(x_train_path)[:10]
 X_train_torch = x_dst.to(dtype=torch.float64)
 
 
 # Affine, Shear, zoom, brightness
-transforms.Compose([
+x_tran = transforms.Compose([
     transforms.RandomRotation(degrees=(0,25)),
     transforms.RandomResizedCrop(),
     transforms.RandomErasing(),
@@ -27,4 +51,4 @@ transforms.Compose([
     ]
                    )
 
-
+test = x_tran(X_train_torch)
