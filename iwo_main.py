@@ -33,12 +33,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # Load the train and test data set
     train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
-
+    
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=0.001) ##change from SGD-->ADAM
+    #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
