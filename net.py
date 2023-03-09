@@ -12,15 +12,15 @@ class Net(nn.Module):
             nn.Conv2d(1, 64, kernel_size=3, stride=1,padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=4),
+            nn.MaxPool2d(kernel_size=2),
             torch.nn.Dropout(p=0.5, inplace=True),
 
             # Defining another 2D convolution layer
             nn.Conv2d(64, 32, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3),
-            torch.nn.Dropout(p=0.25, inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+            torch.nn.Dropout(p=0.5, inplace=True),
 
             # Defining another 2D convolution layer
             nn.Conv2d(32, 16, kernel_size=3, stride=1,padding=1),
@@ -44,7 +44,7 @@ class Net(nn.Module):
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Linear(6, 256),
+            nn.Linear(64, 256),
             nn.Linear(256, n_classes)
         )
 

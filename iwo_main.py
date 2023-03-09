@@ -220,7 +220,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
             plotext.xticks([i for i in range(len(mean_losses_train) + 1)])
 
-            plotext.show()
+            # plotext.show() #cm if doesnt work
 
     # retrieve current time to label artifacts
     now = datetime.now()
