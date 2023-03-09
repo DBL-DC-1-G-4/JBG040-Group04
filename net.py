@@ -9,30 +9,42 @@ class Net(nn.Module):
             # Defining a 2D convolution layer
             # Each layer is convolution, batch normalization applied
             # ReLU, max pooling and dropout
-            nn.Conv2d(1, 64, kernel_size=7, stride=1),
+            nn.Conv2d(1, 64, kernel_size=3, stride=1,padding=1),
             nn.BatchNorm2d(64),
-            #nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=4),
             torch.nn.Dropout(p=0.5, inplace=True),
+
             # Defining another 2D convolution layer
-            nn.Conv2d(64, 32, kernel_size=5, stride=1), 
+            nn.Conv2d(64, 32, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(32),
-            #nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3),
             torch.nn.Dropout(p=0.25, inplace=True),
+
             # Defining another 2D convolution layer
-            nn.Conv2d(32, 16, kernel_size=3, stride=1),
+            nn.Conv2d(32, 16, kernel_size=3, stride=1,padding=1),
             nn.BatchNorm2d(16),
-            #nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2),
             torch.nn.Dropout(p=0.125, inplace=True),
+            
+            #NEW GROUP
+            nn.Conv2d(16, 8, kernel_size=3, stride=1,padding=1),
+            nn.BatchNorm2d(8),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+            torch.nn.Dropout(p=0.0625, inplace=True),
+            #NEW GROUP
+            nn.Conv2d(8, 4, kernel_size=3, stride=1,padding=1),
+            nn.BatchNorm2d(4),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+            torch.nn.Dropout(p=0.0625, inplace=True),
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Linear(144, 256),
+            nn.Linear(6, 256),
             nn.Linear(256, n_classes)
         )
 

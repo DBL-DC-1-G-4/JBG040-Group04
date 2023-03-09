@@ -38,7 +38,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.Adam(model.parameters(), lr=0.001) ##change from SGD-->ADAM
+    optimizer = optim.Adam(model.parameters(), lr=0.01) ##change from SGD-->ADAM 
     #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()
 
