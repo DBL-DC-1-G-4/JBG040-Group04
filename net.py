@@ -13,10 +13,10 @@ class Net(nn.Module):
             #CONV 1 
             nn.Conv2d(1, 64, kernel_size=3, stride=1,padding=1),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(64,64,kernel_size=3,padding=1),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
             
 
@@ -24,10 +24,10 @@ class Net(nn.Module):
             #CONV 2
             nn.Conv2d(64, 128, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(128, 128, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
             
 
@@ -35,31 +35,31 @@ class Net(nn.Module):
             #CONV 3
             nn.Conv2d(128, 256, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(256, 256, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
             #NEW GROUP
             #CONV 4
             nn.Conv2d(256, 512, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(512, 512, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
        
             #NEW GROUP
             nn.Conv2d(512, 512, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(512, 512, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(512, 512, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
 
 
@@ -67,12 +67,12 @@ class Net(nn.Module):
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Linear(512*7*7, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5, inplace=True),
+            nn.Linear(512*4*4, 4096),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5, inplace=True),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(4096, n_classes),
             #nn.Softmax(dim=1)
         )
