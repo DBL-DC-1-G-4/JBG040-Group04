@@ -38,7 +38,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.Adam(model.parameters(), lr=0.01) ##change from SGD-->ADAM 
+    optimizer = optim.Adam(model.parameters(), lr=0.01,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.0005
     #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()
 
@@ -127,14 +127,14 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
                     # Make predictions on the test images
                     outputs = model(images)
                     _, predicted = torch.max(outputs, 1)
-                    probs = torch.softmax(outputs, dim=1)
+                    #probs = torch.softmax(outputs, dim=1)
 
                     # Store the predicted labels and true labels for the current test image
                     pred_labels.extend(predicted.cpu().numpy())
                     true_labels.extend(labels.cpu().numpy())
 
                     # Store the predicted probabilities for the current test image
-                    pred_probs[i] = probs.cpu().numpy()
+                    #pred_probs[i] = probs.cpu().numpy()
 
             #sklearn function for a confusion matrix
             print("Recall score:", recall_score(true_labels, pred_labels, average="macro"))
@@ -149,60 +149,60 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             plt.show()
 
             # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
-            pred_probs = pred_probs.reshape((-1, 6))
+           # pred_probs = pred_probs.reshape((-1, 6))
 
-            # Calculate the AUC-ROC score OVR
-            auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
-            print("AUC-ROC-OVR score:", auc_roc_score_ovr)
-            # Calculate the AUC-ROC score OVO
-            auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
-            print("AUC-ROC-OVO score:", auc_roc_score_ovo)
+            # # Calculate the AUC-ROC score OVR
+            # auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
+            # print("AUC-ROC-OVR score:", auc_roc_score_ovr)
+            # # Calculate the AUC-ROC score OVO
+            # auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
+            # print("AUC-ROC-OVO score:", auc_roc_score_ovo)
 
-            # Calculate the precision, recall, and f1-score for each class
-            precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
+            # # Calculate the precision, recall, and f1-score for each class
+            # precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
 
-            # Print the precision, recall, and f1-score for each class
-            for i in range(len(precision)):
-                print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
-
-
-            # Binarize the true labels
-            y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
+            # # Print the precision, recall, and f1-score for each class
+            # for i in range(len(precision)):
+            #     print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
 
 
-            # Fit the OneVsRestClassifier on the predicted probabilities
-            classifier = OneVsRestClassifier(RandomForestClassifier())
-            classifier.fit(pred_probs, y_true)
+            # # Binarize the true labels
+            # y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
 
-            # Compute the ROC curve and ROC area for each class
-            fpr = dict()
-            tpr = dict()
-            roc_auc = dict()
-            for i in range(n_classes):
-                fpr[i], tpr[i], _ = roc_curve(y_true[:, i], pred_probs[:, i])
-                roc_auc[i] = auc(fpr[i], tpr[i])
 
-            # Compute micro-average ROC curve and ROC area
-            fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
-            roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+            # # Fit the OneVsRestClassifier on the predicted probabilities
+            # classifier = OneVsRestClassifier(RandomForestClassifier())
+            # classifier.fit(pred_probs, y_true)
 
-            # Plot the ROC curve for each class
-            plt.figure()
-            lw = 2
-            colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
-            for i, color in zip(range(n_classes), colors):
-                plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
+            # # Compute the ROC curve and ROC area for each class
+            # fpr = dict()
+            # tpr = dict()
+            # roc_auc = dict()
+            # for i in range(n_classes):
+            #     fpr[i], tpr[i], _ = roc_curve(y_true[:, i], pred_probs[:, i])
+            #     roc_auc[i] = auc(fpr[i], tpr[i])
 
-            # Plot the micro-average ROC curve
-            plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
-            plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title('Multi-class ROC Curve')
-            plt.legend(loc="lower right")
-            plt.show()
+            # # Compute micro-average ROC curve and ROC area
+            # fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
+            # roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+            # # Plot the ROC curve for each class
+            # plt.figure()
+            # lw = 2
+            # colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
+            # for i, color in zip(range(n_classes), colors):
+            #     plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
+
+            # # Plot the micro-average ROC curve
+            # plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
+            # plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+            # plt.xlim([0.0, 1.0])
+            # plt.ylim([0.0, 1.05])
+            # plt.xlabel('False Positive Rate')
+            # plt.ylabel('True Positive Rate')
+            # plt.title('Multi-class ROC Curve')
+            # plt.legend(loc="lower right")
+            # plt.show()
 
 
 

@@ -35,7 +35,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # This line is equivalent to the previous
     
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
+    #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
+    optimizer=optim.Adam(model.parameters(),lr=0.01,weight_decay=0.001)
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
