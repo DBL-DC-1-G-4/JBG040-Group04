@@ -83,5 +83,6 @@ class Net(nn.Module):
         # After our convolutional layers which are 2D, we need to flatten our
         # input to be 1 dimensional, as the linear layers require this.
         x = x.view(x.size(0), -1)
+        x=self.linear_layers(x)
         
         return x
