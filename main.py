@@ -19,6 +19,8 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
+from net_resnet2 import *
+
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
@@ -27,10 +29,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
 
     # Load the Neural Net. NOTE: set number of distinct labels here
-    model = Net(n_classes=6)
+    model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
     
-    m = torch.jit.script(Net(n_classes=6))
-    torch.jit.save(m, 'initial.pt')
     
     # This line is equivalent to the previous
     
