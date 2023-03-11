@@ -1,7 +1,6 @@
 # Custom imports
 from batch_sampler import BatchSampler
 from image_dataset import ImageDataset
-from net import Net
 from train_test import train_model, test_model
 
 # Torch imports
@@ -19,7 +18,7 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
-from net_resnet2 import *
+from net import *
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:

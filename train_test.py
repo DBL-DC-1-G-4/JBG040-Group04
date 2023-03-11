@@ -1,12 +1,12 @@
 from tqdm import tqdm
 import torch
-from net import Net
+from net import *
 from batch_sampler import BatchSampler
 from typing import Callable, List
 
 
 def train_model(
-        model: Net,
+        model,
         train_sampler: BatchSampler,
         optimizer: torch.optim.Optimizer,
         loss_function: Callable[..., torch.Tensor],
@@ -38,7 +38,7 @@ def train_model(
 
 
 def test_model(
-        model: Net,
+        model,
         test_sampler: BatchSampler,
         loss_function: Callable[..., torch.Tensor],
         device: str,
