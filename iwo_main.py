@@ -38,12 +38,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.Adam(model.parameters(), lr=0.01,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.0005
+    optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.00005) ##change from SGD-->ADAM ,weight_decay=0.0005
     #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
-    n_epochs = args.nb_epochs
+    #n_epochs = args.nb_epochs
+    n_epochs=20
     batch_size = args.batch_size
 
     # IMPORTANT! Set this to True to see actual errors regarding
@@ -143,10 +144,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             cm = confusion_matrix(true_labels, pred_labels)
             print(cm)
 
-            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
-            disp.plot()
-            plt.title("Confusion matrix")
-            plt.show()
+            #disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
+            #disp.plot()
+            #plt.title("Confusion matrix")
+            #plt.show()
 
             # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
            # pred_probs = pred_probs.reshape((-1, 6))
@@ -158,12 +159,12 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
             # print("AUC-ROC-OVO score:", auc_roc_score_ovo)
 
-            # # Calculate the precision, recall, and f1-score for each class
-            # precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
+            # Calculate the precision, recall, and f1-score for each class
+            precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
 
             # # Print the precision, recall, and f1-score for each class
-            # for i in range(len(precision)):
-            #     print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
+            for i in range(len(precision)):
+                print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
 
 
             # # Binarize the true labels
