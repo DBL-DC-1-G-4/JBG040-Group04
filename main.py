@@ -18,8 +18,7 @@ import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
-from net import *
-
+from resnet import *
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
