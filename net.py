@@ -20,8 +20,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            #nn.Dropout(p=0.05),
-            
+            nn.Dropout(p=0.1),
 
             # Defining another 2D convolution layer
             #CONV 2
@@ -32,11 +31,10 @@ class Net(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            #nn.Dropout(p=0.05),
-            
+            nn.Dropout(p=0.1),
 
-            # Defining another 2D convolution layer
-            #CONV 3
+            #NEW GROUP
+            #CONV 4
             nn.Conv2d(32, 64, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(64),
             nn.ReLU(),
