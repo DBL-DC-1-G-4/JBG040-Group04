@@ -42,7 +42,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            #nn.Dropout(p=0.05),
+            nn.Dropout(p=0.05),
             #NEW GROUP
             #CONV 4
             nn.Conv2d(64, 128, kernel_size=3, stride=1,padding=1), 
@@ -52,7 +52,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            #nn.Dropout(p=0.05),
+            nn.Dropout(p=0.05),
        
             #NEW GROUP
             nn.Conv2d(128, 128, kernel_size=3, stride=1,padding=1), 
@@ -65,17 +65,17 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            #nn.Dropout(p=0.05),
+            nn.Dropout(p=0.05),
 
 
  
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.3),
             nn.Linear(128*4*4, 512),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.3),
             nn.Linear(512, 512),
             nn.ReLU(),
             nn.Linear(512, n_classes),
