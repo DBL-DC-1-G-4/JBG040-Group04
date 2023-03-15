@@ -38,13 +38,14 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
-    optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.00005) ##change from SGD-->ADAM ,weight_decay=0.0005
+    optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1, patience=3, verbose=True,min_lr=0.00001)
     #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
     #n_epochs = args.nb_epochs
-    n_epochs=20
+    n_epochs=30
     batch_size = args.batch_size
 
     # IMPORTANT! Set this to True to see actual errors regarding
@@ -85,6 +86,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     for e in range(n_epochs):
         if activeloop:
+            
 
             # Training:
             #my addition 
@@ -210,6 +212,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
+            scheduler.step(mean_loss)
             mean_losses_test.append(mean_loss)
             print(f"\nEpoch {e + 1} testing done, loss on test set: {mean_loss}\n")
 
