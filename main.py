@@ -1,7 +1,7 @@
 # Custom imports
 from batch_sampler import BatchSampler
 from image_dataset import ImageDataset
-from net import Net
+from net import VGG
 from train_test import train_model, test_model
 
 # Torch imports
@@ -36,7 +36,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
     
     # Load the Neural Net. NOTE: set number of distinct labels here
-    model = Net(n_classes=6)
+    model = VGG(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
     optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.
