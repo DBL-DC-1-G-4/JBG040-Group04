@@ -25,7 +25,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # Load the train and test data set
     train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
-
+    
+    train_dataset_split = ImageDataset(Path("../data/X_train_split.npy"), Path("../data/Y_train_split.npy"))
+    validation_dataset_split = ImageDataset(Path("../data/X_validation_split.npy"), Path("../data/Y_validation_split.npy"))
+    
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
     
@@ -66,27 +69,38 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         device = "cpu"
         # Creating a summary of our model and its layers:
         summary(model, (1, 128, 128), device=device)
-
+    
     # Lets now train and test our model for multiple epochs:
     train_sampler = BatchSampler(
-        batch_size=batch_size, dataset=train_dataset, balanced=args.balanced_batches
-    )
+        batch_size=batch_size, dataset=train_dataset_split, balanced=args.balanced_batches)
+    
+    val_sampler = BatchSampler(
+            batch_size=batch_size, dataset=validation_dataset_split, balanced=args.balanced_batches)
+    
     test_sampler = BatchSampler(
-        batch_size=100, dataset=test_dataset, balanced=args.balanced_batches
-    )
-
+        batch_size=100, dataset=test_dataset, balanced=args.balanced_batches)
+        
     mean_losses_train: List[torch.Tensor] = []
+    mean_losses_val: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
     
     for e in range(n_epochs):
         if activeloop:
-
+    
             # Training:
             losses = train_model(model, train_sampler, optimizer, loss_function, device)
             # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_train.append(mean_loss)
             print(f"\nEpoch {e + 1} training done, loss on train set: {mean_loss}\n")
+            
+            # Validation:
+            losses = test_model(model, val_sampler, loss_function, device)
+ 
+            # Calculating and printing statistics:
+            mean_loss = sum(losses) / len(losses)
+            mean_losses_val.append(mean_loss)
+            print(f"\nEpoch {e + 1} validation done, loss on validation set: {mean_loss}\n")
 
             # Testing:
             losses = test_model(model, test_sampler, loss_function, device)
@@ -100,6 +114,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             plotext.clf()
             plotext.scatter(mean_losses_train, label="train")
             plotext.scatter(mean_losses_test, label="test")
+            plotext.scatter(mean_losses_val, label="validation")
             plotext.title("Train and test loss")
 
             plotext.xticks([i for i in range(len(mean_losses_train) + 1)])
@@ -117,10 +132,11 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Create plot of losses
     figure(figsize=(9, 10), dpi=80)
-    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     
     ax1.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
     ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
+    ax3.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_val], label="Validation", color="green")
     fig.legend()
     
     # Check if /artifacts/ subdir exists
