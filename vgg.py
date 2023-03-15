@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class VGG(nn.Module):
     def __init__(self, n_classes: int) -> None:
-        super(Net, self).__init__()
+        super(VGG, self).__init__()
         
         self.cnn_layers = nn.Sequential(
             # Defining a 2D convolution layer

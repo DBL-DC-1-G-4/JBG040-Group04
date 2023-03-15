@@ -1,6 +1,5 @@
 from tqdm import tqdm
 import torch
-from net import *
 from batch_sampler import BatchSampler
 from typing import Callable, List
 
