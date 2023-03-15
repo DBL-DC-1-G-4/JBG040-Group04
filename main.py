@@ -167,7 +167,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             macro_precision, macro_recall, macro_f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average='macro')
             weighted_precision, weighted_recall, weighted_f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average='weighted')
 
-            # create the table data as a 2D array
+            # create the table data for precision, recall and f1
             table_data = [['Class', 'Precision', 'Recall', 'F1-score']]
             for i in range(len(precision)):
                 table_data.append(['Class {}'.format(i+1), '{:.2f}'.format(precision[i]), '{:.2f}'.format(recall[i]), '{:.2f}'.format(f1_score[i])])
@@ -201,6 +201,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
             roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
+
     # retrieve current time to label artifacts
     now = datetime.now()
     # check if model_weights/ subdir exists
@@ -225,7 +226,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # save plot of losses
     fig.savefig(Path("artifacts") / f"session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
 
-    # create the table using Matplotlib
+    # create the table
     fig, ax = plt.subplots()
     table = ax.table(cellText=table_data, loc='center')
     table.auto_set_font_size(False)
@@ -233,32 +234,6 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     table.scale(1, 2.5)
     ax.axis('off')
     fig.savefig(Path("artifacts") / f"table_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
-
-    # list for barchart x axis
-    l = ["0","1","2","3","4","5"]
-    # save precision barchart
-    fig = plt.figure(figsize=(8,6), dpi=80)
-    plt.bar(l,precision)
-    plt.xlabel("classes")
-    plt.ylabel("precision")
-    plt.title("precision scores for each class")
-    fig.savefig(Path("artifacts") / f"precision_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
-
-    # save recall barchart
-    fig = plt.figure(figsize=(8,6), dpi=80)
-    plt.bar(l,recall)
-    plt.xlabel("classes")
-    plt.ylabel("recall")
-    plt.title("recall scores for each class")
-    fig.savefig(Path("artifacts") / f"recall_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
-
-    # save f1_score barchart
-    fig = plt.figure(figsize=(8,6), dpi=80)
-    plt.bar(l,f1_score)
-    plt.xlabel("classes")
-    plt.ylabel("f1_score")
-    plt.title("f1_score scores for each class")
-    fig.savefig(Path("artifacts") / f"f1_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
 
     # save ROC curve
     fig = plt.figure(figsize=(8,6), dpi=80)
@@ -283,6 +258,24 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     disp.plot()
     plt.title("Confusion matrix")
     disp.figure_.savefig(Path("artifacts") / f"confmatr_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # new encoding scheme 0 - no finding, 1 - low risk, 2 - high risk
+    # remember now does not show missclassifying low risk dieases between them, same for high risk
+    class_map = {3: 0,
+                 2: 2, 
+                 5: 2, 
+                 0: 1, 
+                 4: 1, 
+                 1: 1}
+    true_labels_mapped = [class_map[label] for label in true_labels]
+    pred_labels_mapped = [class_map[label] for label in pred_labels]
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    cm = confusion_matrix(true_labels_mapped, pred_labels_mapped)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2])
+    disp.plot()
+    plt.title("Confusion matrix of severity")
+    disp.figure_.savefig(Path("artifacts") / f"confmatrseverity_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
 
     # save superimposed plot of losses for epochs
     fig = plt.figure(figsize=(8,6), dpi=80)
