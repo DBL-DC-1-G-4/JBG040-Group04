@@ -13,34 +13,40 @@ from torchsummary import summary  # type: ignore
 # Other imports
 import matplotlib.pyplot as plt  # type: ignore
 from matplotlib.pyplot import figure
+
 import os
 import argparse
 import plotext  # type: ignore
 from datetime import datetime
 from pathlib import Path
 from typing import List
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, recall_score, precision_score, roc_auc_score, roc_curve,auc,RocCurveDisplay,precision_recall_fscore_support
+from sklearn.preprocessing import label_binarize
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.ensemble import RandomForestClassifier
+import seaborn as sns
+from evaluation import evaluation
+
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # Load the train and test data set
     train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
-
+    
     # Load the Neural Net. NOTE: set number of distinct labels here
     model = Net(n_classes=6)
-    
-    m = torch.jit.script(Net(n_classes=6))
-    torch.jit.save(m, 'initial.pt')
-    
-    # This line is equivalent to the previous
-    
+
     # Initialize optimizer(s) and loss function(s)
+    optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1, patience=3, verbose=True,min_lr=0.00001)
     #optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.1)
-    optimizer=optim.Adam(model.parameters(),lr=0.01,weight_decay=0.001)
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
     n_epochs = args.nb_epochs
+    
     batch_size = args.batch_size
 
     # IMPORTANT! Set this to True to see actual errors regarding
@@ -75,25 +81,32 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     test_sampler = BatchSampler(
         batch_size=100, dataset=test_dataset, balanced=args.balanced_batches
     )
-
+   
     mean_losses_train: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
     
+    n_classes=6
+
     for e in range(n_epochs):
         if activeloop:
+            
 
             # Training:
+            #my addition 
+            model.train()
+            #end
             losses = train_model(model, train_sampler, optimizer, loss_function, device)
             # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_train.append(mean_loss)
             print(f"\nEpoch {e + 1} training done, loss on train set: {mean_loss}\n")
-
-            # Testing:
-            losses = test_model(model, test_sampler, loss_function, device)
+           
+           
+           
 
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
+            scheduler.step(mean_loss)
             mean_losses_test.append(mean_loss)
             print(f"\nEpoch {e + 1} testing done, loss on test set: {mean_loss}\n")
 
@@ -105,7 +118,51 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
             plotext.xticks([i for i in range(len(mean_losses_train) + 1)])
 
-            plotext.show()
+            # plotext.show() #cm if doesnt work
+
+
+    # Testing:
+            
+    losses = test_model(model, test_sampler, loss_function, device)
+    ### My addition of checking the predictions
+
+    
+    # Create an empty numpy array to store the predicted probabilities for each test image
+    pred_probs = np.zeros((len(test_dataset), n_classes))
+
+    model.eval()
+
+    # Create a dataloader for the test data
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+
+    # Create lists to store the predicted labels and ground truth labels
+    pred_labels = []
+    true_labels = []
+
+    # Create an empty numpy array to store the predicted probabilities for each test image
+    pred_probs = np.zeros((len(test_dataset), 6))
+
+    # Iterate over the test data and make predictions
+    with torch.no_grad():
+        for i, (images, labels) in enumerate(test_loader):
+            # Move the images and labels to the device (GPU/CPU) used for training
+            images = images.to(device)
+            labels = labels.to(device)
+
+            # Make predictions on the test images
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            probs = torch.softmax(outputs, dim=1)
+
+            # Store the predicted labels and true labels for the current test image
+            pred_labels.extend(predicted.cpu().numpy())
+            true_labels.extend(labels.cpu().numpy())
+
+            # Store the predicted probabilities for the current test image
+            pred_probs[i] = probs.cpu().numpy()
+
+    #sklearn function for a confusion matrix
+    evaluation(pred_labels,true_labels,pred_probs)
 
     # retrieve current time to label artifacts
     now = datetime.now()
@@ -136,7 +193,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--nb_epochs", help="number of training iterations", default=10, type=int
+        "--nb_epochs", help="number of training iterations", default=30, type=int
     )
     parser.add_argument("--batch_size", help="batch_size", default=25, type=int)
     parser.add_argument(
@@ -148,3 +205,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+

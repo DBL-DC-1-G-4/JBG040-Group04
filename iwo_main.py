@@ -26,6 +26,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
+from evaluation import evaluation
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
@@ -44,8 +45,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     loss_function = nn.CrossEntropyLoss()
 
     # fetch epoch and batch count from arguments
-    #n_epochs = args.nb_epochs
-    n_epochs=30
+    n_epochs = args.nb_epochs
+    
     batch_size = args.batch_size
 
     # IMPORTANT! Set this to True to see actual errors regarding
@@ -84,6 +85,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     mean_losses_train: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
     
+    n_classes=6
+
     for e in range(n_epochs):
         if activeloop:
             
@@ -97,118 +100,9 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             mean_loss = sum(losses) / len(losses)
             mean_losses_train.append(mean_loss)
             print(f"\nEpoch {e + 1} training done, loss on train set: {mean_loss}\n")
-
-            # Testing:
-            
-            losses = test_model(model, test_sampler, loss_function, device)
-            ### My addition of checking the predictions
-
-            n_classes=6
-            # Create an empty numpy array to store the predicted probabilities for each test image
-            pred_probs = np.zeros((len(test_dataset), n_classes))
-
-            model.eval()
-
-            # Create a dataloader for the test data
-            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
-
-            # Create lists to store the predicted labels and ground truth labels
-            pred_labels = []
-            true_labels = []
-            cm = []
-
-            # Create an empty numpy array to store the predicted probabilities for each test image
-            pred_probs = np.zeros((len(test_dataset), 6))
-
-            # Iterate over the test data and make predictions
-            with torch.no_grad():
-                for i, (images, labels) in enumerate(test_loader):
-                    # Move the images and labels to the device (GPU/CPU) used for training
-                    images = images.to(device)
-                    labels = labels.to(device)
-
-                    # Make predictions on the test images
-                    outputs = model(images)
-                    _, predicted = torch.max(outputs, 1)
-                    #probs = torch.softmax(outputs, dim=1)
-
-                    # Store the predicted labels and true labels for the current test image
-                    pred_labels.extend(predicted.cpu().numpy())
-                    true_labels.extend(labels.cpu().numpy())
-
-                    # Store the predicted probabilities for the current test image
-                    #pred_probs[i] = probs.cpu().numpy()
-
-            #sklearn function for a confusion matrix
-            print("Recall score:", recall_score(true_labels, pred_labels, average="macro"))
-            print("Precision score:", precision_score(true_labels, pred_labels, average="macro"))
-
-            cm = confusion_matrix(true_labels, pred_labels)
-            print(cm)
-
-            #disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2, 3, 4, 5])
-            #disp.plot()
-            #plt.title("Confusion matrix")
-            #plt.show()
-
-            # Reshape the predicted probabilities array to have shape (n_samples, n_classes)
-           # pred_probs = pred_probs.reshape((-1, 6))
-
-            # # Calculate the AUC-ROC score OVR
-            # auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
-            # print("AUC-ROC-OVR score:", auc_roc_score_ovr)
-            # # Calculate the AUC-ROC score OVO
-            # auc_roc_score_ovo = roc_auc_score(true_labels, pred_probs, multi_class='ovo')
-            # print("AUC-ROC-OVO score:", auc_roc_score_ovo)
-
-            # Calculate the precision, recall, and f1-score for each class
-            precision, recall, f1_score, _ = precision_recall_fscore_support(true_labels, pred_labels, average=None)
-
-            # # Print the precision, recall, and f1-score for each class
-            for i in range(len(precision)):
-                print(f"Class {i}: precision={precision[i]}, recall={recall[i]}, f1-score={f1_score[i]}")
-
-
-            # # Binarize the true labels
-            # y_true = label_binarize(true_labels, classes=[0, 1, 2, 3, 4, 5])
-
-
-            # # Fit the OneVsRestClassifier on the predicted probabilities
-            # classifier = OneVsRestClassifier(RandomForestClassifier())
-            # classifier.fit(pred_probs, y_true)
-
-            # # Compute the ROC curve and ROC area for each class
-            # fpr = dict()
-            # tpr = dict()
-            # roc_auc = dict()
-            # for i in range(n_classes):
-            #     fpr[i], tpr[i], _ = roc_curve(y_true[:, i], pred_probs[:, i])
-            #     roc_auc[i] = auc(fpr[i], tpr[i])
-
-            # # Compute micro-average ROC curve and ROC area
-            # fpr["micro"], tpr["micro"], _ = roc_curve(y_true.ravel(), pred_probs.ravel())
-            # roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-
-            # # Plot the ROC curve for each class
-            # plt.figure()
-            # lw = 2
-            # colors = ['darkorange', 'blue', 'green', 'red', 'purple', 'black']
-            # for i, color in zip(range(n_classes), colors):
-            #     plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='ROC curve of class {0} (area = {1:0.2f})'''.format(i, roc_auc[i]))
-
-            # # Plot the micro-average ROC curve
-            # plt.plot(fpr["micro"], tpr["micro"], label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]),color='deeppink', linestyle=':', linewidth=4)
-            # plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-            # plt.xlim([0.0, 1.0])
-            # plt.ylim([0.0, 1.05])
-            # plt.xlabel('False Positive Rate')
-            # plt.ylabel('True Positive Rate')
-            # plt.title('Multi-class ROC Curve')
-            # plt.legend(loc="lower right")
-            # plt.show()
-
-
-
+           
+           
+           
 
             # # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
@@ -225,6 +119,50 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             plotext.xticks([i for i in range(len(mean_losses_train) + 1)])
 
             # plotext.show() #cm if doesnt work
+
+
+    # Testing:
+            
+    losses = test_model(model, test_sampler, loss_function, device)
+    ### My addition of checking the predictions
+
+    
+    # Create an empty numpy array to store the predicted probabilities for each test image
+    pred_probs = np.zeros((len(test_dataset), n_classes))
+
+    model.eval()
+
+    # Create a dataloader for the test data
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+
+    # Create lists to store the predicted labels and ground truth labels
+    pred_labels = []
+    true_labels = []
+
+    # Create an empty numpy array to store the predicted probabilities for each test image
+    pred_probs = np.zeros((len(test_dataset), 6))
+
+    # Iterate over the test data and make predictions
+    with torch.no_grad():
+        for i, (images, labels) in enumerate(test_loader):
+            # Move the images and labels to the device (GPU/CPU) used for training
+            images = images.to(device)
+            labels = labels.to(device)
+
+            # Make predictions on the test images
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            probs = torch.softmax(outputs, dim=1)
+
+            # Store the predicted labels and true labels for the current test image
+            pred_labels.extend(predicted.cpu().numpy())
+            true_labels.extend(labels.cpu().numpy())
+
+            # Store the predicted probabilities for the current test image
+            pred_probs[i] = probs.cpu().numpy()
+
+    #sklearn function for a confusion matrix
+    evaluation(pred_labels,true_labels,pred_probs)
 
     # retrieve current time to label artifacts
     now = datetime.now()
@@ -255,7 +193,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--nb_epochs", help="number of training iterations", default=10, type=int
+        "--nb_epochs", help="number of training iterations", default=1, type=int
     )
     parser.add_argument("--batch_size", help="batch_size", default=25, type=int)
     parser.add_argument(
