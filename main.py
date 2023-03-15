@@ -38,6 +38,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
     
     # Load the Neural Net. NOTE: set number of distinct labels here
+    # model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
     model = VGG(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
