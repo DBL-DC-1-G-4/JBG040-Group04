@@ -29,21 +29,40 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 from evaluation import evaluation
+from augmentation import *
+from validation_split import validation_split
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
+    augmentation = args.augmentation
+    validation_ratio = args.validation_ratio
 
-    # Load the train and test data set
-    train_dataset = ImageDataset(Path("../data/X_train.npy"), Path("../data/Y_train.npy"))
-    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
+    # Construct the validation datasets
+    validation_split(validation_ratio)
     
-    train_dataset_split = ImageDataset(Path("../data/X_train_split.npy"), Path("../data/Y_train_split.npy"))
-    validation_dataset_split = ImageDataset(Path("../data/X_validation_split.npy"), Path("../data/Y_validation_split.npy"))
+    directory = "../data/"
+
+    if(augmentation>0):
+        print("Running on augmented data!")
+        if not Path("../data/augmented/").exists():
+            os.mkdir(Path("../data/augmented/"))
+            augment_data()
+        directory = "../data/augmented/"
+        
+    print(directory)
+
+    # Load all of the datasets
+    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("../data/Y_train_split.npy"))
+    val_dataset = ImageDataset(Path("../data/X_validation_split.npy"), Path("../data/Y_validation_split.npy"))
+    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
+
+    print(len(train_dataset))
     
     
     # Load the Neural Net. NOTE: set number of distinct labels here
     # model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
-    model = VGG(n_classes=6)
+    # model = VGG(n_classes=6)
+    model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
     optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.
@@ -53,7 +72,6 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # fetch epoch and batch count from arguments
     n_epochs = args.nb_epochs
-    
     batch_size = args.batch_size
 
     # IMPORTANT! Set this to True to see actual errors regarding
@@ -83,10 +101,10 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Lets now train and test our model for multiple epochs:
     train_sampler = BatchSampler(
-        batch_size=batch_size, dataset=train_dataset_split, balanced=args.balanced_batches)
+        batch_size=batch_size, dataset=train_dataset, balanced=args.balanced_batches)
     
     val_sampler = BatchSampler(
-            batch_size=batch_size, dataset=validation_dataset_split, balanced=args.balanced_batches)
+            batch_size=batch_size, dataset=val_dataset, balanced=args.balanced_batches)
     
     test_sampler = BatchSampler(
         batch_size=100, dataset=test_dataset, balanced=args.balanced_batches)
@@ -204,6 +222,12 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--nb_epochs", help="number of training iterations", default=5, type=int
+    )
+    parser.add_argument(
+        "--augmentation", help="whether the model should be run on augmented data", default=0, type=int
+    )
+    parser.add_argument(
+        "--validation_ratio", help="how big should the validation set be", default=0.2, type=float
     )
     parser.add_argument("--batch_size", help="batch_size", default=25, type=int)
     parser.add_argument(
