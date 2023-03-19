@@ -60,9 +60,9 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     
     # Load the Neural Net. NOTE: set number of distinct labels here
-    # model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
-    # model = VGG(n_classes=6)
-    model = Net(n_classes=6)
+    #model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
+    model = VGG(n_classes=6)
+    #model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
     optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=0.001) ##change from SGD-->ADAM ,weight_decay=0.
@@ -119,7 +119,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         if activeloop:
             # Training:
             #my addition 
-            model.train()
+            
             #end
             
             losses = train_model(model, train_sampler, optimizer, loss_function, device)
@@ -135,7 +135,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             mean_loss = sum(losses) / len(losses)
             mean_losses_val.append(mean_loss)
             print(f"\nEpoch {e + 1} validation done, loss on validation set: {mean_loss}\n")
-
+            scheduler.step(mean_loss)
             ### Plotting during training
             plotext.clf()
             plotext.scatter(mean_losses_train, label="train")
@@ -151,13 +151,14 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # Testing:
             
     losses = test_model(model, test_sampler, loss_function, device)
-    ### My addition of checking the predictions
+    # Calculating and printing statistics:
+    mean_loss_test = sum(losses) / len(losses)
+    print(f"Final Test Loss: {mean_loss_test}\n")
 
     
     # Create an empty numpy array to store the predicted probabilities for each test image
     pred_probs = np.zeros((len(test_dataset), n_classes))
 
-    model.eval()
 
     # Create a dataloader for the test data
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
@@ -202,11 +203,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Create plot of losses
     figure(figsize=(9, 10), dpi=80)
-    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
     
     ax1.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
-    ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_test], label="Test", color="red")
-    ax3.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_val], label="Validation", color="green")
+    ax1.axhline(y = mean_loss_test, color = 'r', linestyle = 'dashed')
+    ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_val], label="Validation", color="green")
+    ax2.axhline(y = mean_loss_test, color = 'r', linestyle = 'dashed')
+   
     fig.legend()
     
     # Check if /artifacts/ subdir exists
