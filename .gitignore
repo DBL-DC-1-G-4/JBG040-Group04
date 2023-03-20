@@ -3,9 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pt
-dc1/artifacts
-dc1/model_weights
-dc1/*.png
+artifacts
+model_weights
+*.png
 
 # C extensions
 *.so
