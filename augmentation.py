@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def get_dirs():
     parDir = os.path.dirname(os.getcwd())
-    data_path = os.path.join(parDir, "data")
+    data_path = "data"
     x_train_path = os.path.join(data_path, "X_train.npy")
     y_train_path = os.path.join(data_path, "Y_train.npy")
     x_test_path = os.path.join(data_path, "Y_test.npy")
@@ -40,4 +40,4 @@ def augment_data():
     )
 
     x_auged = x_tran(X_train_torch).numpy()
-    np.save(os.path.join(parDir, "data/augmented/X_train_split.npy"), x_auged)
+    np.save("data/augmented/X_train_split.npy", x_auged)

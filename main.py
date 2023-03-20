@@ -40,21 +40,21 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # Construct the validation datasets
     validation_split(validation_ratio)
     
-    directory = "../data/"
+    directory = "data/"
 
     if(augmentation>0):
         print("Running on augmented data!")
-        if not Path("../data/augmented/").exists():
-            os.mkdir(Path("../data/augmented/"))
+        if not Path("data/augmented/").exists():
+            os.mkdir(Path("data/augmented/"))
             augment_data()
-        directory = "../data/augmented/"
+        directory = "data/augmented/"
         
     print(directory)
 
     # Load all of the datasets
-    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("../data/Y_train_split.npy"))
-    val_dataset = ImageDataset(Path("../data/X_validation_split.npy"), Path("../data/Y_validation_split.npy"))
-    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
+    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("data/Y_train_split.npy"))
+    val_dataset = ImageDataset(Path("data/X_validation_split.npy"), Path("data/Y_validation_split.npy"))
+    test_dataset = ImageDataset(Path("data/X_test.npy"), Path("data/Y_test.npy"))
 
     print(len(train_dataset))
     
