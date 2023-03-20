@@ -3,15 +3,15 @@
 The code should be run using the 'main.py' file.
 The paths have been modified to suit the course administration. Hopefully this solves the problem from the orevious sprint. Cheers
 
-augment.py contains the current image augmentation process
+augment.py contains the current image augmentation process.
 
-EDA.py contains the exploratory data analysis
+EDA.py contains the exploratory data analysis.
 
-iwo_main.py contains evaluation metrics such as f1 score, precision, recall roc_curve and roc auc scores
+iwo_main.py contains evaluation metrics such as f1 score, precision, recall roc_curve and roc auc scores.
 
-resnet.py contains the network based on ResNet architecture
+resnet.py contains the network based on ResNet architecture.
 
-vgg.py contains the network based on VGG16 architecture
+vgg.py contains the network based on VGG16 architecture.
 
 # Data-Challenge-1-template-code
 This repository contains the template code for the TU/e course JBG040 Data Challenge 1.
