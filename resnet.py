@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# This code is a combination of our own efforts, as well as code adapted from the internet to suit
+# our needs.
 class BasicBlock(nn.Module):
     expansion = 1
 
