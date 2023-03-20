@@ -13,6 +13,8 @@ resnet.py contains the network based on ResNet architecture.
 
 vgg.py contains the network based on VGG16 architecture.
 
+Get_Clean_Training_Data.py gets the cleaned data
+
 # Data-Challenge-1-template-code
 This repository contains the template code for the TU/e course JBG040 Data Challenge 1.
 Please read this document carefully as it has been filled out with important information.
