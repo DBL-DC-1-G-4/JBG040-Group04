@@ -1,6 +1,7 @@
 ## Group 4
 
 The code should be run using the 'main.py' file.
+The paths have been modified to suit the course administration. Hopefully this solves the problem from the orevious sprint. Cheers
 
 augment.py contains the current image augmentation process
 
