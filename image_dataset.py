@@ -67,7 +67,7 @@ if __name__ == "__main__":
     if path.exists(path.join(cwd + "data/")):
         print("Data directory exists, files may be overwritten!")
     else:
-        os.mkdir(path.join(cwd, "../data/"))
+        os.mkdir(path.join(cwd, "data/"))
     ### Load labels
     train_y = load_numpy_arr_from_url(
         url="https://surfdrive.surf.nl/files/index.php/s/i6MvQ8nqoiQ9Tci/download"
