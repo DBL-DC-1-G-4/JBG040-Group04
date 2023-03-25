@@ -3,9 +3,9 @@ from torchvision import transforms
 from pathlib import Path
 import numpy as np
 import torch
-
-train_dataset = ImageDataset(Path("/Users/zygimantaskrasauskas/Desktop/DS1/data/X_train.npy"),
-                             Path("/Users/zygimantaskrasauskas/Desktop/DS1/data/Y_train.npy"))
+from torch.utils.data import ConcatDataset
+train_dataset = ImageDataset(Path("/Users/20211922/Documents/DBL1/data/X_train.npy"),
+                             Path("/Users/20211922/Documents/DBL1/data/Y_train.npy"))
 
 train_data = train_dataset.imgs
 train_labels = train_dataset.targets
@@ -27,12 +27,18 @@ augmentation_rules = transforms.Compose([
         transforms.RandomAutocontrast()]
 )
 
-train_augmented = augmentation_rules(train_data_torch).numpy()
+train_augmented = augmentation_rules(train_data_torch)
+train_augmented = train_augmented.numpy()
 
-np.save("/Users/zygimantaskrasauskas/Desktop/X_train_augmented.npy", train_augmented)
-np.save("/Users/zygimantaskrasauskas/Desktop/X_test_augmented.npy", train_labels)
+np.save("/Users/20211922/Documents/DBL1/data/X_train_augmented.npy", train_augmented)
+np.save("/Users/20211922/Documents/DBL1/data/Y_train_augmented.npy", train_labels)
 
-train_dataset_augmented = ImageDataset(Path("/Users/zygimantaskrasauskas/Desktop/X_train_augmented.npy"), 
-                                       Path("/Users/zygimantaskrasauskas/Desktop/X_test_augmented.npy"))
+train_dataset_augmented = ImageDataset(Path("/Users/20211922/Documents/DBL1/data/X_train_augmented.npy"), 
+                                       Path("/Users/20211922/Documents/DBL1/data/Y_train_augmented.npy"))
 
-merged_train = train_dataset.concatenate(train_dataset_augmented)
+merged_train = ConcatDataset([train_dataset, train_dataset_augmented])
+img, label = merged_train[0]
+
+# print the shape of the image and the label
+print(img.shape)
+print(label)
