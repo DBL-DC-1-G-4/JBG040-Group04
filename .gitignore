@@ -5,6 +5,8 @@ __pycache__/
 *.pt
 artifacts
 model_weights
+*.png
+data/*
 
 # C extensions
 *.so

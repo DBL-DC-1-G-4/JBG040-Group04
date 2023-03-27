@@ -40,21 +40,21 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     # Construct the validation datasets
     validation_split(validation_ratio)
     
-    directory = "../data/"
+    directory = "data/"
 
     if(augmentation>0):
         print("Running on augmented data!")
-        if not Path("../data/augmented/").exists():
-            os.mkdir(Path("../data/augmented/"))
+        if not Path("data/augmented/").exists():
+            os.mkdir(Path("data/augmented/"))
             augment_data()
-        directory = "../data/augmented/"
+        directory = "data/augmented/"
         
     print(directory)
 
     # Load all of the datasets
-    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("../data/Y_train_split.npy"))
-    val_dataset = ImageDataset(Path("../data/X_validation_split.npy"), Path("../data/Y_validation_split.npy"))
-    test_dataset = ImageDataset(Path("../data/X_test.npy"), Path("../data/Y_test.npy"))
+    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("data/Y_train_split.npy"))
+    val_dataset = ImageDataset(Path("data/X_validation_split.npy"), Path("data/Y_validation_split.npy"))
+    test_dataset = ImageDataset(Path("data/X_test.npy"), Path("data/Y_test.npy"))
 
     print(len(train_dataset))
     
@@ -149,7 +149,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
 
     # Testing:
-            
+
     losses = test_model(model, test_sampler, loss_function, device)
     # Calculating and printing statistics:
     mean_loss_test = sum(losses) / len(losses)
@@ -206,9 +206,9 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
     
     ax1.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_train], label="Train", color="blue")
-    ax1.axhline(y = mean_loss_test, color = 'r', linestyle = 'dashed')
+    ax1.axhline(y = mean_loss_test.cpu(), color = 'r', linestyle = 'dashed')
     ax2.plot(range(1, 1 + n_epochs), [x.detach().cpu() for x in mean_losses_val], label="Validation", color="green")
-    ax2.axhline(y = mean_loss_test, color = 'r', linestyle = 'dashed')
+    ax2.axhline(y = mean_loss_test.cpu(), color = 'r', linestyle = 'dashed')
    
     fig.legend()
     
