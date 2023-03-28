@@ -1,14 +1,28 @@
+import os
+os.chdir("/Users/zygimantaskrasauskas/Desktop/DS1/JBG040-Group04")
+
 from image_dataset import ImageDataset
 from torchvision import transforms
+from collections import Counter
 from pathlib import Path
 import numpy as np
 import torch
+
+os.chdir("/Users/zygimantaskrasauskas/Desktop/DS1")
 
 train_dataset = ImageDataset(Path("data/X_train.npy"),
                              Path("data/Y_train.npy"))
 
 train_data = train_dataset.imgs
 train_labels = train_dataset.targets
+
+unique_data_labels = np.unique(train_labels)
+
+square_dict = {label: train_data[train_labels == label] for label in unique_data_labels}
+
+# Find the biggest amount of disease and its number
+max_count = Counter(train_labels.tolist()).most_common(1)[0][1]
+max_count_label = Counter(train_labels.tolist()).most_common(1)[0][0]
 
 torch.manual_seed(689)
 
@@ -25,6 +39,7 @@ augmentation_rules = transforms.Compose([
         transforms.RandomAdjustSharpness(sharpness_factor=1.3, p=0.1),
         transforms.RandomAutocontrast()]
 )
+
 
 train_augmented = augmentation_rules(train_data_torch).numpy()
 
