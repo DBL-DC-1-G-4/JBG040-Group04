@@ -110,15 +110,15 @@ uniqueLabels, frequency = np.unique(
 maxCount = frequency.argmax()
 
 base = np.ones(len(frequency))*frequency[maxCount]
-howMany = np.empty(len(frequency))
 
-for i in range(len(frequency)):
-    howMany[i] = base[i] - frequency[i] 
+# howMany = np.empty(len(frequency))
+# for i in range(len(frequency)):
+#     howMany[i] = base[i] - frequency[i] 
 
+howMany = base - frequency
 howMany = howMany.astype(int)
+
 toBeAuged = np.empty((howMany.sum(), 1, 128, 128))
-
-
 
 Y_train = np.empty(howMany.sum())
 Y_train = Y_train.astype(int)
@@ -138,14 +138,7 @@ Y_balanced = np.concatenate((train_labels, Y_train),axis = 0)
 print((Y_balanced.shape, balanced.shape))
 
 train_torch = torch.from_numpy(balanced).to(dtype=torch.float32)
-
-
 train_augmented = scriptPipe(train_torch).numpy()
 
 np.save(os.path.join(parDir, "X_train_balanced.npy"), train_augmented) #change paths to save augmented datasets for different pipes
 np.save(os.path.join(parDir, "Y_train_balanced.npy"), Y_balanced)
-
-
-
-
-#%%
