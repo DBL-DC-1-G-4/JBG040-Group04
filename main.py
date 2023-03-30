@@ -47,12 +47,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             os.mkdir(Path("data/augmented/"))
         augment(pVersion = 1)
         directory = "data/augmented/"
+    
     if(balancing>0):
         print("Running on balanced data!")
-        if not Path("data/balanced").exists():
-            os.mkdir(Path("data/balanced"))
-        balance()
-        directory = "data/balanced"
+        if not Path("data/balanced/").exists():
+            os.mkdir(Path("data/balanced/"))
+        balance(directory)
+        directory = "data/balanced/"
 
 
     # Construct the validation datasets
@@ -242,14 +243,7 @@ if __name__ == "__main__":
         "--validation_ratio", help="how big should the validation set be", default=0.2, type=float
     )
     parser.add_argument("--batch_size", help="batch_size", default=25, type=int)
-    parser.add_argument(
-        "--balanced_batches",
-        help="whether to balance batches for class labels",
-        default=True,
-        type=bool,
-    )
+    parser.add_argument("--balanced", help="whether to balance batches for class labels", default=1, type=int)
     args = parser.parse_args()
 
     main(args)
-
-
