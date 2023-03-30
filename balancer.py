@@ -14,6 +14,7 @@ def balance() -> None:
     cwd = os.getcwd()
     parDir = os.path.pardir(cwd)
     data = os.path.join(parDir,"data")
+    balancedDir = os.path.join(data, "balanced")
     train_dataset = ImageDataset(
             os.path.join(data,"X_train.npy"),
             os.path.join(data,"Y_train.npy")
@@ -39,5 +40,5 @@ def balance() -> None:
             Y_train_bottom_balanced[num] = labels[i]
             num += 1
 
-    np.save(os.path.join(parDir, "X_train_bottom_balanced.npy"), bottomBalanced) #change paths to save augmented datasets for different pipes
-    np.save(os.path.join(parDir, "Y_train_bottom_balanced.npy"), Y_train_bottom_balanced)
+    np.save(os.path.join(balancedDir, "X_train.npy"), bottomBalanced) #change paths to save augmented datasets for different pipes
+    np.save(os.path.join(balancedDir, "Y_train.npy"), Y_train_bottom_balanced)

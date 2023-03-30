@@ -31,10 +31,12 @@ import seaborn as sns
 from evaluation import evaluation
 from augmentation import augment
 from validation_split import validation_split
+from balancer import balance
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     augmentation = args.augmentation
+    balancing = args.balancing
     validation_ratio = args.validation_ratio
 
     directory = "data/"
@@ -45,6 +47,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             os.mkdir(Path("data/augmented/"))
         augment(pVersion = 1)
         directory = "data/augmented/"
+    if(balancing>0):
+        print("Running on balanced data!")
+        if not Path("data/balanced").exists():
+            os.mkdir(Path("data/balanced"))
+        balance()
+        directory = "data/balanced"
+
 
     # Construct the validation datasets
     validation_split(validation_ratio, directory)

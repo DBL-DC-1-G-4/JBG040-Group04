@@ -22,6 +22,7 @@ def augment(pVersion: int) -> None:
     cwd = os.getcwd()
     parDir = os.path.dirname(cwd)
     data = os.path.join(parDir, "data")
+    augmentedDir = os.path.join(data, "augmented")
     train_dataset = ImageDataset(
             os.path.join(data, "X_train.npy"),
             os.path.join(data, "Y_train.npy")
@@ -100,5 +101,5 @@ def augment(pVersion: int) -> None:
     balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
     Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_train.copy()))
     #  Change paths to save augmented datasets for different pipes
-    np.save(os.path.join(parDir, "X_train_balanced.npy"), balancedAndAuged)
-    np.save(os.path.join(parDir, "Y_train_balanced.npy"), Y_balanced_augmented)
+    np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
+    np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
