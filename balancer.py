@@ -5,19 +5,16 @@ import random
 
 
 
-def balance() -> None:
+def balance(directory) -> None:
     """
     This creates a balanced dataset without augmentations 
     i.e. reduces the number of samples of all categories to that of the smallest category
     """
     random.seed(689)
-    cwd = os.getcwd()
-    parDir = os.path.pardir(cwd)
-    data = os.path.join(parDir,"data")
-    balancedDir = os.path.join(data, "balanced")
+   
     train_dataset = ImageDataset(
-            os.path.join(data,"X_train.npy"),
-            os.path.join(data,"Y_train.npy")
+            f"{directory}X_train.npy",
+            f"{directory}Y_train.npy"
             )
     train_data = train_dataset.imgs
     train_labels = train_dataset.targets
@@ -40,5 +37,5 @@ def balance() -> None:
             Y_train_bottom_balanced[num] = labels[i]
             num += 1
 
-    np.save(os.path.join(balancedDir, "X_train.npy"), bottomBalanced) #change paths to save augmented datasets for different pipes
-    np.save(os.path.join(balancedDir, "Y_train.npy"), Y_train_bottom_balanced)
+    np.save( "data/balanced/X_train.npy", bottomBalanced) #change paths to save augmented datasets for different pipes
+    np.save("data/balanced/Y_train.npy", Y_train_bottom_balanced)
