@@ -4,13 +4,13 @@ import os
 import random
 
 
-random.seed(689)
 
 def balance() -> None:
     """
     This creates a balanced dataset without augmentations 
     i.e. reduces the number of samples of all categories to that of the smallest category
     """
+    random.seed(689)
     cwd = os.getcwd()
     parDir = os.path.pardir(cwd)
     data = os.path.join(parDir,"data")
