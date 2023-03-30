@@ -3,11 +3,11 @@
 The code should be run using the 'main.py' file.
 The paths have been modified to suit the course administration. Hopefully this solves the problem from the orevious sprint. Cheers
 
-augment.py contains the current image augmentation process.
+augment.py contains the current image augmentation process, it balances the dataset.
+
+balancer.py contains a baseline balancing without augmentation to draw a comparison.
 
 EDA.py contains the exploratory data analysis.
-
-iwo_main.py contains evaluation metrics such as f1 score, precision, recall roc_curve and roc auc scores.
 
 resnet.py contains the network based on ResNet architecture.
 
