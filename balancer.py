@@ -14,8 +14,7 @@ def balance() -> None:
     """
     random.seed(689)
     cwd = os.getcwd()
-    parDir = os.path.dirname(cwd)
-    dataDir = os.path.join(parDir,"data")
+    dataDir = os.path.join(cwd, "data")
 
     train_dataset = ImageDataset(
             os.path.join(dataDir, "X_train.npy"),
@@ -42,8 +41,5 @@ def balance() -> None:
             num += 1
     balancedDir = os.path.join(dataDir, "balanced")
     
-    np.save(os.path.join(balancedDir, "X_train.npy"), bottomBalanced) #change paths to save augmented datasets for different pipes
+    np.save(os.path.join(balancedDir, "X_train.npy"), bottomBalanced)#  change paths to save augmented datasets for different pipes
     np.save(os.path.join(balancedDir, "Y_train.npy"), Y_train_bottom_balanced)
-
-
-balance()

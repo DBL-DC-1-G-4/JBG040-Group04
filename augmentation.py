@@ -8,10 +8,13 @@ from image_dataset import ImageDataset
 
 def augment(pVersion: int) -> None:
     """
-    Applies image augmentation techniques to the training data based on the value of `pVersion`, and saves the augmented data and corresponding labels to a directory.
+    Applies image augmentation techniques to the training data based on
+    the value of `pVersion`, and saves the augmented data and
+    corresponding labels to a directory.
 
     Args:
-        pVersion (int): The version of the augmentation pipeline to be used. Must be one of the following:
+        pVersion (int): The version of the augmentation pipeline to be used.
+        Must be one of the following:
             1: rotation,
             2: brightness, contrast and saturation,
             3: sharpness,
@@ -24,15 +27,14 @@ def augment(pVersion: int) -> None:
     """
 
     cwd = os.getcwd()
-    parDir = os.path.dirname(cwd)
-    dataDir = os.path.join(parDir, "data")
+    dataDir = os.path.join(cwd, "data")
     torch.manual_seed(689)
     random.seed(689)
     train_dataset = ImageDataset(
             os.path.join(dataDir, "X_train.npy"),
             os.path.join(dataDir, "Y_train.npy"),
     )
-            
+
     train_data = train_dataset.imgs
     train_labels = train_dataset.targets
 
@@ -81,7 +83,7 @@ def augment(pVersion: int) -> None:
             train_labels,
             return_counts=True
             )
-    maxIndex= frequency.argmax()
+    maxIndex = frequency.argmax()
     base = np.ones(len(frequency))*frequency[maxIndex]
     howMany = base - frequency
     howMany = howMany.astype(int)
@@ -106,5 +108,4 @@ def augment(pVersion: int) -> None:
     augmentedDir = os.path.join(dataDir, "augmented")
     np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
     np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
-
 
