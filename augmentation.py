@@ -18,15 +18,11 @@ def augment(pVersion: int) -> None:
     """
     torch.manual_seed(689)
     random.seed(689)
-
-    cwd = os.getcwd()
-    parDir = os.path.dirname(cwd)
-    data = os.path.join(parDir, "data")
-    augmentedDir = os.path.join(data, "augmented")
     train_dataset = ImageDataset(
-            os.path.join(data, "X_train.npy"),
-            os.path.join(data, "Y_train.npy")
-            )
+            "data/X_train.npy",
+            "data/Y_train.npy"
+    )
+            
     train_data = train_dataset.imgs
     train_labels = train_dataset.targets
 
@@ -101,5 +97,5 @@ def augment(pVersion: int) -> None:
     balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
     Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_train.copy()))
     #  Change paths to save augmented datasets for different pipes
-    np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
-    np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
+    np.save( "data/augmented/X_train.npy", balancedAndAuged)
+    np.save("data/augmented/Y_train.npy", Y_balanced_augmented)
