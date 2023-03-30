@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt #used for the plot
 import random #used for the random images
 
 #load the data
-X_test = np.load(r"C:\Users\20212392\OneDrive - TU Eindhoven\Uni\Y2\Q3\Data Challenge 1\code_template\dc1\data\X_test.npy")
-X_train = np.load(r"C:\Users\20212392\OneDrive - TU Eindhoven\Uni\Y2\Q3\Data Challenge 1\code_template\dc1\data\X_train.npy")
-Y_test = np.load(r"C:\Users\20212392\OneDrive - TU Eindhoven\Uni\Y2\Q3\Data Challenge 1\code_template\dc1\data\Y_test.npy")
-Y_train = np.load(r"C:\Users\20212392\OneDrive - TU Eindhoven\Uni\Y2\Q3\Data Challenge 1\code_template\dc1\data\Y_train.npy")
+X_test = np.load("data/X_test.npy")
+X_train = np.load("data/X_train.npy")
+Y_test = np.load("data/Y_test.npy")
+Y_train = np.load("data/Y_train.npy")
 
 
 #bar charts of the Y data
@@ -16,11 +16,11 @@ unique_Y_test, counts_Y_test = np.unique(Y_test, return_counts=True)
 bar_Y_train = plt.bar(["Atelectasis", "Effusion", "Infiltration" ,"No finding","Nodule","Pneumothorax"], counts_Y_train) #display the occurences in a bar chart
 
 plt.title('Division of the Training Class Labels')
-plt.savefig('bar_Y_training')
+plt.savefig('EDA_figures/bar_Y_training')
 plt.show()
 bar_Y_test = plt.bar(["Atelectasis", "Effusion", "Infiltration" ,"No finding","Nodule","Pneumothorax"], counts_Y_test)
 plt.title('Division of the Test Class Labels')
-plt.savefig('bar_Y_test')
+plt.savefig('EDA_figures/bar_Y_test')
 plt.show()
 
 
