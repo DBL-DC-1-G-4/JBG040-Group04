@@ -44,15 +44,12 @@ class ImageDataset:
         return np.load(path)
 
 def augment(pVersion:int)->None:
-    cwd = os.getcwd()
-    parDir = os.path.dirname(cwd)
-    data = os.path.join(parDir, "data")
     torch.manual_seed(689)
 
 
     train_dataset = ImageDataset(
-            os.path.join(data, "X_train.npy"),
-            os.path.join(data, "Y_train.npy")
+            os.path.join("data/X_train.npy"),
+            os.path.join("data/Y_train.npy")
             )
     train_data = train_dataset.imgs
     train_labels = train_dataset.targets
@@ -135,7 +132,6 @@ def augment(pVersion:int)->None:
 
     train_torch = torch.from_numpy(balanced).to(dtype=torch.float32)
     train_augmented = scriptPipe(train_torch).numpy()
-
-    np.save(os.path.join(parDir, "X_train_balanced.npy"), train_augmented) #change paths to save augmented datasets for different pipes
-    np.save(os.path.join(parDir, "Y_train_balanced.npy"), Y_balanced)
+    np.save("data/augmented/X_train.npy", train_augmented) #change paths to save augmented datasets for different pipes
+    np.save("data/augmented/Y_train.npy", Y_balanced)
  

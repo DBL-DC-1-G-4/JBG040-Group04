@@ -29,7 +29,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 from evaluation import evaluation
-from augmentation import *
+from augmentation import augment
 from validation_split import validation_split
 
 
@@ -37,23 +37,23 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     augmentation = args.augmentation
     validation_ratio = args.validation_ratio
 
-    # Construct the validation datasets
-    validation_split(validation_ratio)
-    
     directory = "data/"
-
+    
     if(augmentation>0):
         print("Running on augmented data!")
         if not Path("data/augmented/").exists():
             os.mkdir(Path("data/augmented/"))
-            augment(pVersion = 1)
+        augment(pVersion = 1)
         directory = "data/augmented/"
-        
+
+    # Construct the validation datasets
+    validation_split(validation_ratio, directory)
     print(directory)
 
     # Load all of the datasets
-    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path("data/Y_train_split.npy"))
-    val_dataset = ImageDataset(Path("data/X_validation_split.npy"), Path("data/Y_validation_split.npy"))
+    train_dataset = ImageDataset(Path(directory+"X_train_split.npy"), Path(directory+"Y_train_split.npy"))
+    val_dataset = ImageDataset(Path(directory+"X_validation_split.npy"), Path(directory+"Y_validation_split.npy"))
+
     test_dataset = ImageDataset(Path("data/X_test.npy"), Path("data/Y_test.npy"))
 
     print(len(train_dataset))
