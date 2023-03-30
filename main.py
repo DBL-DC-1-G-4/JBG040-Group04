@@ -5,6 +5,8 @@ from vgg import VGG
 from baseline import Net
 from resnet import *
 from train_test import train_model, test_model
+from augmentation import augment
+from balancer import balance
 
 # Torch imports
 import torch
@@ -29,9 +31,8 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 from evaluation import evaluation
-from augmentation import augment
 from validation_split import validation_split
-from balancer import balance
+
 
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
