@@ -6,8 +6,11 @@ import random
 
 def balance() -> None:
     """
-    This creates a balanced dataset without augmentations 
-    i.e. reduces the number of samples of all categories to that of the smallest category
+    This function creates a balanced dataset without augmentations. It reduces the number of samples of all categories 
+    to that of the smallest category.
+    
+    Returns:
+    None
     """
     random.seed(689)
     cwd = os.getcwd()

@@ -8,14 +8,21 @@ from image_dataset import ImageDataset
 
 def augment(pVersion: int) -> None:
     """
-    Choose pipe you want to use and pass it as an argument above,
+    Applies image augmentation techniques to the training data based on the value of `pVersion`, and saves the augmented data and corresponding labels to a directory.
+
+    Args:
+        pVersion (int): The version of the augmentation pipeline to be used. Must be one of the following:
             1: rotation,
             2: brightness, contrast and saturation,
             3: sharpness,
             4: rotation, brightness, contrast and saturation,
             5: rotation and sharpness,
             6: rotation, sharpness, brightness, contrast and saturation,
+
+    Returns:
+        None
     """
+
     cwd = os.getcwd()
     parDir = os.path.dirname(cwd)
     dataDir = os.path.join(parDir, "data")
@@ -101,4 +108,3 @@ def augment(pVersion: int) -> None:
     np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
 
 
-augment(1)
