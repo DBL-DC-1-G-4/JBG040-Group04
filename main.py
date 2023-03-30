@@ -29,7 +29,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 from evaluation import evaluation
-from augmentation import *
+from augmentationPipe import *
 from validation_split import validation_split
 
 
@@ -46,7 +46,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         print("Running on augmented data!")
         if not Path("data/augmented/").exists():
             os.mkdir(Path("data/augmented/"))
-            augment_data()
+            augment(1)
         directory = "data/augmented/"
         
     print(directory)

@@ -1,19 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt #used for the plot
-import random #used for the random images
 from pathlib import Path
-#load the data
 import torchvision.transforms as transforms
 from random import randint
-import numpy as np
 import torch
 from typing import Tuple
-from pathlib import Path
 import os
+from image_dataset import ImageDataset
 
 directory = "data/"
-X_test = np.load(r"C:\Users\20211922\Documents\DBL1\data\X_test.npy")
-X_train = np.load(r"C:\Users\20211922\Documents\DBL1\data\X_train.npy")
+cwd = os.getcwd()
+parDir = os.path.dirname(cwd)
+data = os.path.join(parDir, "data")
+torch.manual_seed(689)
+
+
+train_dataset = ImageDataset(
+        os.path.join(data, "X_train.npy"),
+        os.path.join(data, "Y_train.npy")
+        )
+
+train_data = train_dataset.imgs
+train_labels = train_dataset.targets
 
 pipe = torch.nn.Sequential(#all without resizing - Maxwell's pipe
         transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
@@ -60,16 +68,16 @@ pipe_rot_crop_sharp_sat = torch.nn.Sequential( #all - Kryz's pipe
     transforms.CenterCrop(size=128),
 )
 #first 10 images unaugmented
-# fig = plt.figure(figsize=(5, 2))
-# for i in range(10):
-#     ax = plt.subplot2grid((2, 5), (int(i / 5), i - int(i / 5) * 5))
-#     ax.imshow(X_train[i][0], cmap='gray')
-#     ax.set_title(f"Label: {Y_train[i]}")
-# plt.show()
-
-X_train_aug = np.zeros_like(X_train[:10])
+fig = plt.figure(figsize=(5, 2))
 for i in range(10):
-    img = X_train[i][0]
+    ax = plt.subplot2grid((2, 5), (int(i / 5), i - int(i / 5) * 5))
+    ax.imshow(train_data[i][0], cmap='gray')
+    ax.set_title(f"Label: {train_labels[i]}")
+plt.show()
+
+X_train_aug = np.zeros_like(train_data[:10])
+for i in range(10):
+    img =train_data[i][0]
     img_tensor = transforms.ToTensor()(img)
     img_tensor = pipe_sharp(img_tensor)
     img_aug = transforms.ToPILImage()(img_tensor)
@@ -80,5 +88,5 @@ fig = plt.figure(figsize=(5, 2))
 for i in range(10):
     ax = plt.subplot2grid((2, 5), (int(i / 5), i - int(i / 5) * 5))
     ax.imshow(X_train_aug[i][0], cmap='gray')
-    ax.set_title(f"Label: {Y_train[i]}")
+    ax.set_title(f"Label: {train_labels[i]}")
 plt.show()
