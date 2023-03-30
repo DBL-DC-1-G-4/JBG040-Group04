@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt #used for the plot
 import random #used for the random images
+from pathlib import Path
+import os
+from os import path
+if not Path("EDA_figures/").exists():
+    os.mkdir(Path("EDA_figures/"))
 
 #load the data
 X_test = np.load("data/X_test.npy")
