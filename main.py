@@ -45,16 +45,18 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         print("Running on augmented data!")
         if not Path("data/augmented/").exists():
             os.mkdir(Path("data/augmented/"))
-        augment(pVersion = 1)
+        augment(pVersion=1)
         directory = "data/augmented/"
     
     if(balancing>0):
         print("Running on balanced data!")
         if not Path("data/balanced/").exists():
             os.mkdir(Path("data/balanced/"))
-        balance(directory)
+        balance()
         directory = "data/balanced/"
-
+    if augmentation > 0 and balancing > 0:
+        print("Invalid arguments, both Augmentation and Balancing > 0")
+        return 0
 
     # Construct the validation datasets
     validation_split(validation_ratio, directory)

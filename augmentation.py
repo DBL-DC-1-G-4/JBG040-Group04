@@ -16,11 +16,14 @@ def augment(pVersion: int) -> None:
             5: rotation and sharpness,
             6: rotation, sharpness, brightness, contrast and saturation,
     """
+    cwd = os.getcwd()
+    parDir = os.path.dirname(cwd)
+    dataDir = os.path.join(parDir, "data")
     torch.manual_seed(689)
     random.seed(689)
     train_dataset = ImageDataset(
-            "data/X_train.npy",
-            "data/Y_train.npy"
+            os.path.join(dataDir, "X_train.npy"),
+            os.path.join(dataDir, "Y_train.npy"),
     )
             
     train_data = train_dataset.imgs
@@ -71,16 +74,12 @@ def augment(pVersion: int) -> None:
             train_labels,
             return_counts=True
             )
-    maxCount = frequency.argmax()
-
-    base = np.ones(len(frequency))*frequency[maxCount]
+    maxIndex= frequency.argmax()
+    base = np.ones(len(frequency))*frequency[maxIndex]
     howMany = base - frequency
     howMany = howMany.astype(int)
-
-    toBeAuged = np.empty((howMany.sum(), 1, 128, 128))
-
-    Y_train = np.empty(howMany.sum())
-    Y_train = Y_train.astype(int)
+    toBeAuged = np.empty((howMany.sum(), 1, 128, 128), dtype=int)
+    Y_train = np.empty(howMany.sum(), dtype=int)
 
     num = 0
     for i in range(len(uniqueLabels)):
@@ -97,5 +96,9 @@ def augment(pVersion: int) -> None:
     balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
     Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_train.copy()))
     #  Change paths to save augmented datasets for different pipes
-    np.save( "data/augmented/X_train.npy", balancedAndAuged)
-    np.save("data/augmented/Y_train.npy", Y_balanced_augmented)
+    augmentedDir = os.path.join(dataDir, "augmented")
+    np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
+    np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
+
+
+augment(1)
