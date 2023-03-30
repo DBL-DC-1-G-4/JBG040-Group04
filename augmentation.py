@@ -1,0 +1,104 @@
+import torchvision.transforms as transforms
+import random
+import numpy as np
+import torch
+import os
+from image_dataset import ImageDataset
+
+
+def augment(pVersion: int) -> None:
+    """
+    Choose pipe you want to use and pass it as an argument above,
+            1: rotation,
+            2: brightness, contrast and saturation,
+            3: sharpness,
+            4: rotation, brightness, contrast and saturation,
+            5: rotation and sharpness,
+            6: rotation, sharpness, brightness, contrast and saturation,
+    """
+    torch.manual_seed(689)
+    random.seed(689)
+
+    cwd = os.getcwd()
+    parDir = os.path.dirname(cwd)
+    data = os.path.join(parDir, "data")
+    train_dataset = ImageDataset(
+            os.path.join(data, "X_train.npy"),
+            os.path.join(data, "Y_train.npy")
+            )
+    train_data = train_dataset.imgs
+    train_labels = train_dataset.targets
+
+    pipe_rotate = torch.nn.Sequential(
+        transforms.RandomRotation(5)
+    )
+
+    pipe_bcs = torch.nn.Sequential(
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5)
+    )
+
+    pipe_sharp = torch.nn.Sequential(
+        transforms.RandomAdjustSharpness(
+                sharpness_factor=1.3,
+                p=0.2
+                )
+    )
+    pipe_rotate_bcs = torch.nn.Sequential(
+        transforms.RandomRotation(5),
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5)
+    )
+
+    pipe_rotate_sharp = torch.nn.Sequential(
+        transforms.RandomRotation(5),
+        transforms.RandomAdjustSharpness(sharpness_factor=1.3, p=0.2)
+    )
+
+    pipe_rotate_sharp_bcs = torch.nn.Sequential(
+        transforms.RandomRotation(5),
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
+        transforms.RandomAdjustSharpness(sharpness_factor=1.3, p=0.2),
+    )
+
+    pipeDict = {
+            1: pipe_rotate,
+            2: pipe_bcs,
+            3: pipe_sharp,
+            4: pipe_rotate_bcs,
+            5: pipe_rotate_sharp,
+            6: pipe_rotate_sharp_bcs
+            }
+
+    scriptPipe = torch.jit.script(pipeDict[pVersion])
+
+    uniqueLabels, frequency = np.unique(
+            train_labels,
+            return_counts=True
+            )
+    maxCount = frequency.argmax()
+
+    base = np.ones(len(frequency))*frequency[maxCount]
+    howMany = base - frequency
+    howMany = howMany.astype(int)
+
+    toBeAuged = np.empty((howMany.sum(), 1, 128, 128))
+
+    Y_train = np.empty(howMany.sum())
+    Y_train = Y_train.astype(int)
+
+    num = 0
+    for i in range(len(uniqueLabels)):
+        tempOriginal = train_data[train_labels == uniqueLabels[i]]
+        for count in range(howMany[i]):
+            toBeAuged[num] = tempOriginal[random.randint(0, frequency[i]-1)]
+            Y_train[num] = uniqueLabels[i]
+            num += 1
+
+    balanced = np.concatenate((train_data, toBeAuged), axis=0)
+    Y_balanced = np.concatenate((train_labels, Y_train), axis=0)
+    train_torch = torch.from_numpy(balanced.copy()).to(dtype=torch.float32)
+    train_augmented = scriptPipe(train_torch).numpy()
+    balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
+    Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_train.copy()))
+    #  Change paths to save augmented datasets for different pipes
+    np.save(os.path.join(parDir, "X_train_balanced.npy"), balancedAndAuged)
+    np.save(os.path.join(parDir, "Y_train_balanced.npy"), Y_balanced_augmented)
