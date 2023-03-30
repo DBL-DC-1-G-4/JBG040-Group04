@@ -36,7 +36,7 @@ from balancer import balance
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     augmentation = args.augmentation
-    balancing = args.balancing
+    balancing = args.balanced
     validation_ratio = args.validation_ratio
 
     directory = "data/"
@@ -111,14 +111,13 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     # Lets now train and test our model for multiple epochs:
     train_sampler = BatchSampler(
-        batch_size=batch_size, dataset=train_dataset, balanced=args.balanced_batches)
+        batch_size=batch_size, dataset=train_dataset, balanced=balancing)
     
     val_sampler = BatchSampler(
-            batch_size=batch_size, dataset=val_dataset, balanced=args.balanced_batches)
+            batch_size=batch_size, dataset=val_dataset, balanced=balancing)
     
     test_sampler = BatchSampler(
-        batch_size=100, dataset=test_dataset, balanced=args.balanced_batches)
-        
+        batch_size=100, dataset=test_dataset, balanced=balancing)        
     mean_losses_train: List[torch.Tensor] = []
     mean_losses_val: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
