@@ -46,7 +46,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         print("Running on augmented data!")
         if not Path("data/augmented/").exists():
             os.mkdir(Path("data/augmented/"))
-            augment_data()
+            augment(pVersion = 1)
         directory = "data/augmented/"
         
     print(directory)
