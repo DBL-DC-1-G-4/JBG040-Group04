@@ -84,28 +84,29 @@ def augment(pVersion: int) -> None:
             return_counts=True
             )
     maxIndex = frequency.argmax()
+    #  print(f"Maximum count of a class: {frequency[maxIndex]}")
     base = np.ones(len(frequency))*frequency[maxIndex]
     howMany = base - frequency
     howMany = howMany.astype(int)
     toBeAuged = np.empty((howMany.sum(), 1, 128, 128), dtype=int)
-    Y_train = np.empty(howMany.sum(), dtype=int)
+    Y_train_tba = np.empty(howMany.sum(), dtype=int)
 
     num = 0
     for i in range(len(uniqueLabels)):
         tempOriginal = train_data[train_labels == uniqueLabels[i]]
         for count in range(howMany[i]):
             toBeAuged[num] = tempOriginal[random.randint(0, frequency[i]-1)]
-            Y_train[num] = uniqueLabels[i]
+            Y_train_tba[num] = uniqueLabels[i]
             num += 1
-
-    balanced = np.concatenate((train_data, toBeAuged), axis=0)
-    Y_balanced = np.concatenate((train_labels, Y_train), axis=0)
-    train_torch = torch.from_numpy(balanced.copy()).to(dtype=torch.float32)
-    train_augmented = scriptPipe(train_torch).numpy()
-    balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
-    Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_balanced.copy()))
+    
+    torchBeAuged = torch.from_numpy(toBeAuged).to(dtype=torch.float32)
+    train_augmented = scriptPipe(torchBeAuged).numpy()
+    balancedAndAuged = np.concatenate((train_data, train_augmented), axis=0)
+    Y_balanced_augmented = np.concatenate((train_labels, Y_train_tba), axis=0)
+    #  print((balancedAndAuged.shape, Y_balanced_augmented.shape))
     #  Change paths to save augmented datasets for different pipes
     augmentedDir = os.path.join(dataDir, "augmented")
     np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
     np.save(os.path.join(augmentedDir, "Y_train.npy"), Y_balanced_augmented)
+
 
