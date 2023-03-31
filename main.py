@@ -73,8 +73,8 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     
     # Load the Neural Net. NOTE: set number of distinct labels here
-    #model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
-    model = VGG(n_classes=6)
+    model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=6)
+    #model = VGG(n_classes=6)
     #model = Net(n_classes=6)
 
     # Initialize optimizer(s) and loss function(s)
@@ -138,7 +138,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_train.append(mean_loss)
-            print(f"\nEpoch {e + 1} training done, loss on train set: {mean_loss}\n")
+            print(f"\nEpoch {e + 1}/{n_epochs} training done, loss on train set: {mean_loss}\n")
             
             # Validation:
             losses = test_model(model, val_sampler, loss_function, device)
@@ -146,7 +146,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             # Calculating and printing statistics:
             mean_loss = sum(losses) / len(losses)
             mean_losses_val.append(mean_loss)
-            print(f"\nEpoch {e + 1} validation done, loss on validation set: {mean_loss}\n")
+            print(f"\nEpoch {e + 1}/{n_epochs} validation done, loss on validation set: {mean_loss}\n")
             scheduler.step(mean_loss)
             ### Plotting during training
             plotext.clf()
