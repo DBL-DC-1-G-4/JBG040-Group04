@@ -103,7 +103,7 @@ def augment(pVersion: int) -> None:
     train_torch = torch.from_numpy(balanced.copy()).to(dtype=torch.float32)
     train_augmented = scriptPipe(train_torch).numpy()
     balancedAndAuged = np.concatenate((balanced, train_augmented), axis=0)
-    Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_train.copy()))
+    Y_balanced_augmented = np.concatenate((Y_balanced.copy(), Y_balances.copy()))
     #  Change paths to save augmented datasets for different pipes
     augmentedDir = os.path.join(dataDir, "augmented")
     np.save(os.path.join(augmentedDir, "X_train.npy"), balancedAndAuged)
