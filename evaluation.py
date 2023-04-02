@@ -40,9 +40,6 @@ def evaluation (pred_labels, true_labels, pred_probs):
     fig.savefig(Path("artifacts") / f"table_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
 
 
-    #Reshape the predicted probabilities array to have shape (n_samples, n_classes)
-    pred_probs = pred_probs.reshape((-1, 6))
-
     # Calculate the AUC-ROC score OVR
     auc_roc_score_ovr = roc_auc_score(true_labels, pred_probs, multi_class='ovr')
     print("AUC-ROC-OVR score:", auc_roc_score_ovr)

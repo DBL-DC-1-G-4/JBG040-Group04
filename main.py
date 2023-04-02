@@ -32,6 +32,7 @@ from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 from evaluation import evaluation
 from validation_split import validation_split
+from tqdm import tqdm
 
 
 
@@ -120,7 +121,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             batch_size=batch_size, dataset=val_dataset, balanced=balancing)
     
     test_sampler = BatchSampler(
-        batch_size=100, dataset=test_dataset, balanced=balancing)        
+        batch_size=100, dataset=test_dataset, balanced=1)        
     mean_losses_train: List[torch.Tensor] = []
     mean_losses_val: List[torch.Tensor] = []
     mean_losses_test: List[torch.Tensor] = []
@@ -172,25 +173,26 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     pred_probs = np.zeros((len(test_dataset), n_classes))
 
 
-    # Create a dataloader for the test data
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+ 
 
     # Create lists to store the predicted labels and ground truth labels
     pred_labels = []
     true_labels = []
 
     # Create an empty numpy array to store the predicted probabilities for each test image
-    pred_probs = np.zeros((len(test_dataset), 6))
+    pred_probs = []
 
     # Iterate over the test data and make predictions
     with torch.no_grad():
-        for i, (images, labels) in enumerate(test_loader):
+        for (images, labels) in tqdm(test_sampler):
+            
             # Move the images and labels to the device (GPU/CPU) used for training
             images = images.to(device)
             labels = labels.to(device)
 
             # Make predictions on the test images
-            outputs = model(images)
+            outputs = model.forward(images)
+            
             _, predicted = torch.max(outputs, 1)
             probs = torch.softmax(outputs, dim=1)
 
@@ -199,7 +201,11 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
             true_labels.extend(labels.cpu().numpy())
 
             # Store the predicted probabilities for the current test image
-            pred_probs[i] = probs.cpu().numpy()
+            pred_probs.extend(probs.cpu().numpy())
+    print(pred_probs)
+            
+
+    
 
     #sklearn function for a confusion matrix
     evaluation(pred_labels,true_labels,pred_probs)
