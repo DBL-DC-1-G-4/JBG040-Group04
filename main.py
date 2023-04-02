@@ -73,7 +73,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     
     
     # Load the Neural Net. NOTE: set number of distinct labels here
-    model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=6)
+    model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=6)
     #model = VGG(n_classes=6)
     #model = Net(n_classes=6)
 
