@@ -71,11 +71,29 @@ def evaluation (pred_labels, true_labels, pred_probs):
     pred_labels_mapped = [class_map[label] for label in pred_labels]
     fig = plt.figure(figsize=(8,6), dpi=80)
     cm = confusion_matrix(true_labels_mapped, pred_labels_mapped)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["No disease", "Low risk", "High risk"])
     disp.plot()
     plt.title("Confusion matrix of severity")
     disp.figure_.savefig(Path("artifacts") / f"confmatrseverity_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
     
+    # Frequency 
+    # new encoding scheme 0 - no finding, 1 - low risk, 2 - high risk
+    # remember now does not show missclassifying low risk dieases between them, same for high risk
+    class_map = {3: 0,
+                 0: 2, 
+                 1: 1, 
+                 2: 2, 
+                 4: 1, 
+                 5: 2}
+    true_labels_mapped = [class_map[label] for label in true_labels]
+    pred_labels_mapped = [class_map[label] for label in pred_labels]
+    fig = plt.figure(figsize=(8,6), dpi=80)
+    cm = confusion_matrix(true_labels_mapped, pred_labels_mapped)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["No disease", "Common", "Rare"])
+    disp.plot()
+    plt.title("Confusion matrix of disease rarity")
+    disp.figure_.savefig(Path("artifacts") / f"confmatrrarity_session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
 
 def roc(true_labels,pred_probs):
                # Binarize the true labels
