@@ -63,7 +63,7 @@ def scriptedPipeline(pVersion: int) -> torch.ScriptModule:
     return torch.jit.script(pipeDict[pVersion])
 
 
-def augmentedBalance(pVersion: int) -> None:
+def augmentedBalance(pVersion: int, scaleFactor: float) -> None:
     """
     This function creates a balanced dataset and augments it.
 
@@ -76,13 +76,13 @@ def augmentedBalance(pVersion: int) -> None:
             4: rotation, brightness, contrast and saturation,
             5: rotation and sharpness,
             6: rotation, sharpness, brightness, contrast and saturation,
+        scaleFactor (float): Factor by which the data is augmented.
 
     Returns:
-        None
+        None.
     """
     random.seed(689)
     torch.manual_seed(689)
-
 
     cwd = os.getcwd()
     dataDir = os.path.join(cwd, "data")
@@ -100,19 +100,27 @@ def augmentedBalance(pVersion: int) -> None:
             )
     minIndex = frequency.argmin()
 
-    bottomBalanced = np.empty((len(labels)*frequency[minIndex], 1, 128, 128), dtype=int)
-    Y_train_bottom_balanced = np.empty(len(labels)*frequency[minIndex], dtype=int)
+    bottomBalanced = np.empty(
+            (round(len(labels)*frequency[minIndex]*scaleFactor), 1, 128, 128),
+            dtype=int
+            )
+    Y_train_bottom_balanced = np.empty(
+            round(len(labels)*frequency[minIndex]*scaleFactor),
+            dtype=int
+            )
 
     num = 0
     for i, freq in enumerate(frequency):
         tempOriginal = train_data[train_labels == labels[i]]
-        for count in range(frequency[minIndex]):
+        for count in range(round(frequency[minIndex]*scaleFactor)):
             bottomBalanced[num] = tempOriginal[random.randint(0, freq-1)]
             Y_train_bottom_balanced[num] = labels[i]
             num += 1
 
-    torchBottomBalanced = torch.from_numpy(bottomBalanced).to(dtype=torch.float32)
-    pipe = scriptedPipeline(pVersion) 
+    torchBottomBalanced = torch.from_numpy(
+            bottomBalanced
+            ).to(dtype=torch.float32)
+    pipe = scriptedPipeline(pVersion)
     balancedAndAuged = np.concatenate(
             (bottomBalanced, pipe(torchBottomBalanced)),
             axis=0)
