@@ -7,6 +7,7 @@ from resnet import *
 from train_test import train_model, test_model
 from augmentation import augment
 from balancer import balance
+from augmentedBalance import augmentedBalance
 
 # Torch imports
 import torch
@@ -38,6 +39,7 @@ from tqdm import tqdm
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     augmentation = args.augmentation
+    augmentation_bal=args.augmentation_bal
     balancing = args.balanced
     validation_ratio = args.validation_ratio
 
@@ -47,8 +49,14 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         print("Running on augmented data!")
         if not Path("data/augmented/").exists():
             os.mkdir(Path("data/augmented/"))
-        augment(pVersion=1) #Change augmentation version here
+        augment(pVersion=4) #Change augmentation version here
         directory = "data/augmented/"
+    if(augmentation_bal>0):
+        print("Running on balanced and then augmented data!")
+        if not Path("data/balanced_and_augmented/").exists():
+            os.mkdir(Path("data/balanced_and_augmented/"))
+        augmentedBalance(pVersion=4) #Change augmentation version here
+        directory = "data/balanced_and_augmented/"
     
     if(balancing>0):
         print("Running on balanced data!")
@@ -202,10 +210,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
             # Store the predicted probabilities for the current test image
             pred_probs.extend(probs.cpu().numpy())
-    print(pred_probs)
-            
-
-    
+                
 
     #sklearn function for a confusion matrix
     evaluation(pred_labels,true_labels,pred_probs)
@@ -246,6 +251,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--augmentation", help="whether the model should be run on augmented data", default=0, type=int
+    )
+    parser.add_argument(
+        "--augmentation_bal", help="whether the model should be run on augmented data balanced", default=0, type=int
     )
     parser.add_argument(
         "--validation_ratio", help="how big should the validation set be", default=0.2, type=float
