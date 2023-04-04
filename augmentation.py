@@ -98,7 +98,7 @@ def augment(pVersion: int) -> None:
             toBeAuged[num] = tempOriginal[random.randint(0, frequency[i]-1)]
             Y_train_tba[num] = uniqueLabels[i]
             num += 1
-    
+
     torchBeAuged = torch.from_numpy(toBeAuged).to(dtype=torch.float32)
     train_augmented = scriptPipe(torchBeAuged).numpy()
     balancedAndAuged = np.concatenate((train_data, train_augmented), axis=0)
