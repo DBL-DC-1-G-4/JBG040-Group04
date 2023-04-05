@@ -11,7 +11,8 @@ class VGG(nn.Module):
             # Each layer is convolution, batch normalization applied
             # ReLU, max pooling and dropout
 
-            #c0nv 1
+            # Defining first 2D convolution layer
+            #CONV 1
 
             nn.Conv2d(1, 32, kernel_size=3, stride=1,padding=1),
             nn.BatchNorm2d(32),
@@ -33,8 +34,8 @@ class VGG(nn.Module):
             nn.MaxPool2d(kernel_size=2,stride=2),
             #nn.Dropout(p=0.1),
 
-            #NEW GROUP
-            #CONV 4
+            # Defining another 2D convolution layer
+            #CONV 3
             nn.Conv2d(64, 128, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(128),
             nn.ReLU(),
@@ -43,7 +44,8 @@ class VGG(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
             #nn.Dropout(p=0.05),
-            #NEW GROUP
+
+            # Defining another 2D convolution layer
             #CONV 4
             nn.Conv2d(128, 256, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(256),
@@ -54,7 +56,8 @@ class VGG(nn.Module):
             nn.MaxPool2d(kernel_size=2,stride=2),
             #nn.Dropout(p=0.05),
        
-            #NEW GROUP
+            # Defining another 2D convolution layer
+            #CONV 5
             nn.Conv2d(256, 256, kernel_size=3, stride=1,padding=1), 
             nn.BatchNorm2d(256),
             nn.ReLU(),
