@@ -79,7 +79,7 @@ def augmentedBalance(pVersion: int, scaleFactor: float) -> None:
         scaleFactor (float): Factor by which the data is augmented.
 
     Returns:
-        None
+        None.
     """
     random.seed(689)
     torch.manual_seed(689)

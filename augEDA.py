@@ -11,7 +11,7 @@ from image_dataset import ImageDataset
 directory = "data/"
 cwd = os.getcwd()
 parDir = os.path.dirname(cwd)
-data = os.path.join(parDir, "data")
+data = directory
 torch.manual_seed(689)
 
 
@@ -23,7 +23,7 @@ train_dataset = ImageDataset(
 train_data = train_dataset.imgs
 train_labels = train_dataset.targets
 
-pipe = torch.nn.Sequential(#all without resizing - Maxwell's pipe
+pipe = torch.nn.Sequential(
         transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
         transforms.RandomRotation(5),
         transforms.RandomAdjustSharpness(
@@ -60,7 +60,7 @@ pipe_rot_crop_sharp = torch.nn.Sequential(
     transforms.CenterCrop(size=128),
 )
 
-pipe_rot_crop_sharp_sat = torch.nn.Sequential( #all - Kryz's pipe
+pipe_rot_crop_sharp_sat = torch.nn.Sequential(
     transforms.RandomRotation(5),
     transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
     transforms.RandomResizedCrop(size=128, scale=(0.8, 1.0), ratio=(0.95, 1.05)),
