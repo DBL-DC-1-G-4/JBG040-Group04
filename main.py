@@ -34,8 +34,10 @@ import seaborn as sns
 from evaluation import evaluation
 from validation_split import validation_split
 from tqdm import tqdm
+import random
 
-
+# Dictionary with label names
+label_dict = {0:"Atelectasis", 1: "Effusion", 2: "Infiltration" ,3: "No finding",4: "Nodule",5: "Pneumothorax"}
 
 def main(args: argparse.Namespace, activeloop: bool = True) -> None:
     augmentation = args.augmentation
@@ -241,6 +243,23 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
 
     # save plot of losses
     fig.savefig(Path("artifacts") / f"session_{now.month:02}_{now.day:02}_{now.hour}_{now.minute:02}.png")
+
+    # Adding random samples
+    random_samples = [random.randrange(0,len(pred_probs)) for _ in range(5)]
+    print("###################################")
+    print("Random samples of model predictions")
+    print("###################################")
+    for el in random_samples:
+        predicted = label_dict[pred_labels[el]]
+        actual = label_dict[true_labels[el]]
+        probs = [f"{label_dict[disease]}: {round(prob*100,2)}%" for disease, prob in enumerate(pred_probs[el])]
+        print()
+        print(f"Predicted label: {predicted}, actual label: {actual}")
+        print("With class probabilities:")
+        for p in probs:
+            print(p, end = ', ')
+        print()
+        print("###################################")
 
 
 if __name__ == "__main__":
