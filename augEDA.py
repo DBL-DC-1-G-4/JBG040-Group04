@@ -11,7 +11,7 @@ from image_dataset import ImageDataset
 directory = "data/"
 cwd = os.getcwd()
 parDir = os.path.dirname(cwd)
-data = os.path.join(parDir, "data")
+data = directory
 torch.manual_seed(689)
 
 
