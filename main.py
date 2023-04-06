@@ -55,7 +55,7 @@ def main(args: argparse.Namespace, activeloop: bool = True) -> None:
         print("Running on balanced and then augmented data!")
         if not Path("data/balanced_and_augmented/").exists():
             os.mkdir(Path("data/balanced_and_augmented/"))
-        augmentedBalance(pVersion=4) #Change augmentation version here
+        augmentedBalance(pVersion=1,scaleFactor=0.75) #Change augmentation version here
         directory = "data/balanced_and_augmented/"
     
     if(balancing>0):

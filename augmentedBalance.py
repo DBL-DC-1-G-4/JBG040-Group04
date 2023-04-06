@@ -23,7 +23,7 @@ def scriptedPipeline(pVersion: int) -> torch.ScriptModule:
         torch.ScriptModule
     """
     pipe_rotate = torch.nn.Sequential(
-        transforms.RandomRotation(5)
+        transforms.RandomRotation(10)
     )
 
     pipe_bcs = torch.nn.Sequential(
